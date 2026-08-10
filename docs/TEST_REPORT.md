@@ -101,6 +101,31 @@ Scripted the real browser journeys against the live server (`/tmp/e2e.js`). Scre
 
 ---
 
+## v2 QA — Accounts, Payments, Marketing (2026-08-10)
+
+**Scope:** everything added in v2 — magic-link auth, event claiming, Stripe checkout/webhook, free-plan game enforcement, marketing pages, deploy artefacts — plus a full regression of v1.
+**Verdict:** **PASS.** Critical 0, High 0, Medium 0, Low 0 open.
+
+### What ran
+- **Unit/API:** full suite now **59/59 pass** (47 v1 + 12 new in `test/v2.test.js`). v1 game tests updated to seed `plan='full'` (they exercise the full game machine; free-tier behaviour has its own tests).
+- **Auth:** invalid email 400; valid always identical 200 (no account enumeration); magic link signs in with an httpOnly cookie, is single-use, expires (15 min); logout kills the session; email normalised (trim/lowercase). Mail-sending endpoints have a stricter rate limit (burst 10, 5/min/IP).
+- **Claiming:** claim link attaches the event and redirects to `/o/KEY?claimed=1`; `/api/me` lists it; claiming an event owned by a different email → 409; same email may re-send. **The claim email never contains the organiserKey** (verified).
+- **Payments off (default):** checkout returns `{paymentsEnabled:false}`; webhook 404s; dev-unlock upgrades and is clearly labelled in the UI; checkout on an already-full event → 409.
+- **Payments on (fake fetch):** checkout session created with `unit_amount=1900` GBP and the organiserKey in metadata; dev-unlock 404s; webhook with a garbage signature → 400 (no upgrade); stale-timestamp signature → 400; valid HMAC → plan flips to full; **duplicate delivery idempotent** (paidAt unchanged); confirm-payment fallback verifies by session id and rejects unknown ids.
+- **Free-plan enforcement:** 20 approved questions → free game loads exactly 15 and returns zero superlatives; full plan loads all 20 and superlatives return. Demo events are created on the full plan.
+- **E2E walkthrough (live server, scripted):** create → 8 submissions (one containing `<script>alert(1)</script>`) → build (12 questions, XSS survives as intact text) → moderate (1 edited, 1 binned, rest approved) → claim via magic link fished from the mail transport → dev-unlock → ready → submissions correctly closed → host + 2 socket players (one nicknamed `Bob<script>alert(1)<`) → mid-game disconnect/rejoin with score restored → podium with 4 superlatives. **organiserKey asserted absent from every player-facing socket payload and the submitter API.**
+- **Visual pass (browser):** landing, pricing, how-it-works, account, dashboard (plan + claim cards, dev-unlock button when payments off) all render on-theme. One fix landed during the pass: email inputs were unstyled (CSS only targeted `input[type="text"]`) — extended to `input[type="email"]`.
+
+### v2 fixes during QA
+| # | Severity | Description | Status |
+|---|----------|-------------|--------|
+| 5 | Low | `input[type="email"]` missing from form styling selectors — account/claim email fields rendered with native browser styling. | Fixed 2026-08-10 (grilled.css) |
+
+### Known trade-offs (documented, not bugs)
+- With `PAYMENTS_ENABLED=false` in production, every event can be dev-unlocked free — the flag is a deliberate master switch; DEPLOY.md says so.
+- Magic links in dev go to the server console (by design, `MAIL_MODE=console`).
+- Render free tier has no persistent disk — DEPLOY.md warns and the blueprint defaults to starter.
+
 ## QA Log
 - 2026-08-10 — Read SPEC/ARCHITECTURE/VISION/CONTRACTS; reviewed all server + public source.
 - 2026-08-10 — Confirmed baseline 36/36 existing tests pass.

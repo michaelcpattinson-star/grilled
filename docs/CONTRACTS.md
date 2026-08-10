@@ -65,6 +65,21 @@ Server → client 'state' payload (broadcast to room on every change; also sent 
 ```
 Host screen shows questionText + options + timer; phones render options as big buttons (no questionText), lock after answer. Errors to a socket: 'errorMsg' {message}.
 
+## v2 — Accounts & payments (files: server/routes/auth.js, server/routes/billing.js, server/payments/stripe.js, server/mail/mailer.js)
+GET /api/events/:organiserKey gains additive fields: `plan` ('free'|'full'), `freeQuestionLimit`, `paymentsEnabled`, `claimed`, `claimedByYou`.
+- POST /api/auth/request-link {email} → {ok:true, message} (400 invalid email; always ok for valid — no enumeration; 429 mail-limiter)
+- GET  /auth/verify?token= → 302: session cookie + redirect (/account | /o/KEY?claimed=1 | /account?authError=1 | /account?claimError=1)
+- POST /api/auth/logout → {ok:true} (clears cookie + deletes session)
+- GET  /api/me → {email, events:[{name, occasion, status, plan, organiserUrl, createdAt}]} | 401
+- POST /api/events/:organiserKey/claim {email} → {ok:true, message} (409 claimed by different email; sends claim magic link)
+- POST /api/events/:organiserKey/checkout → {url} | {paymentsEnabled:false} | 409 already full
+- POST /api/events/:organiserKey/confirm-payment {sessionId} → {plan} (redirect-landing fallback; verifies with Stripe)
+- POST /api/events/:organiserKey/dev-unlock → {plan:'full'} (404 when PAYMENTS_ENABLED)
+- POST /api/stripe/webhook (raw body; Stripe-Signature verified, 5-min tolerance) → {received:true} | 400 bad signature
+Session cookie: `grilled_session`, httpOnly, SameSite=Lax, 90 days. Magic tokens single-use, 15-min expiry.
+Free plan: game plays first FREE_QUESTION_LIMIT (15) approved questions, superlatives []. Demo events are plan 'full'.
+Mailer: sendMail({to,subject,text}); transports 'console' (dev default) | 'resend'; test hook setTransportForTests(fn).
+
 ## Frontend (owned by frontend, files: public/*)
 Pages: index.html (landing: Create → /new, Join → /play, Try the demo → POST /api/demo then redirect /o/{key}), new.html, dashboard.html, submit.html, host.html, play.html, 404.html, css/grilled.css, js one file per page + js/shared.js.
 Path parsing: dashboard/host/submit read their key from location.pathname (/o/KEY, /host/KEY, /s/KEY). Socket.IO client from '/socket.io/socket.io.js'.

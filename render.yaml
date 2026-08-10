@@ -1,0 +1,33 @@
+# Render blueprint for Grilled — one Node web service with websockets and a
+# persistent disk for SQLite. Deploy: push this repo to GitHub, then
+# "New → Blueprint" in the Render dashboard and point it at the repo.
+# NOTE: persistent disks require a paid instance (starter). See DEPLOY.md.
+services:
+  - type: web
+    name: grilled
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    disk:
+      name: grilled-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: DB_PATH
+        value: /data/grilled.db
+      - key: BASE_URL
+        sync: false # set to your public URL, e.g. https://grilled.onrender.com
+      - key: PAYMENTS_ENABLED
+        value: "false" # flip to "true" once Stripe keys are set
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: MAIL_MODE
+        value: console # set to "resend" once RESEND_API_KEY is set
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false # e.g. Grilled <hello@yourdomain.com>

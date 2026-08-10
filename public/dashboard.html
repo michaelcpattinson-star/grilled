@@ -37,7 +37,7 @@
 
         <div class="banner" role="note">
           <span class="banner-icon" aria-hidden="true">🔖</span>
-          <span><strong>This link is your key.</strong> Bookmark this page now — there are no accounts and lost links can't be recovered.</span>
+          <span><strong>This link is your key.</strong> Bookmark this page now — or better, claim the quiz by email below so you can always find it again.</span>
         </div>
 
         <!-- (b) Share card -->
@@ -80,6 +80,32 @@
             <button type="button" class="btn btn-primary btn-big" id="build-btn">Build my quiz</button>
           </div>
           <div id="questions-zone" style="margin-top: 0.5rem;"></div>
+        </section>
+
+        <!-- Plan / upgrade -->
+        <section class="card" id="plan-card" aria-labelledby="plan-heading">
+          <h2 id="plan-heading">Your plan <span class="plan-badge plan-free" id="plan-badge">Free Taster</span></h2>
+          <div id="plan-free-zone">
+            <p class="muted small" id="plan-free-msg">The free plan plays your first 15 approved questions and skips the superlatives finale. The <strong>Full Grilling</strong> (£19 one-off for this event) unlocks every question and the awards ceremony.</p>
+            <button type="button" class="btn btn-primary" id="upgrade-btn">Go Full Grilling — £19 🔥</button>
+            <button type="button" class="btn btn-ghost hidden" id="dev-unlock-btn">Unlock Full Grilling (dev mode — payments off)</button>
+          </div>
+          <div id="plan-full-zone" class="hidden">
+            <p class="muted small">Full Grilling unlocked 🎉 Unlimited questions and the superlatives finale are on. Scorch responsibly.</p>
+          </div>
+        </section>
+
+        <!-- Claim by email -->
+        <section class="card" id="claim-card" aria-labelledby="claim-heading">
+          <h2 id="claim-heading">Don't lose this quiz 🔖</h2>
+          <div id="claim-form-zone">
+            <p class="muted small">This link is the key to your quiz. Claim it by email and you can always find it again at <a href="/account">/account</a> — no passwords, just a magic link.</p>
+            <div class="copy-line">
+              <input type="email" id="claim-email" placeholder="you@example.com" autocomplete="email" maxlength="254" aria-label="Your email">
+              <button type="button" class="btn btn-primary" id="claim-btn">Claim this quiz</button>
+            </div>
+          </div>
+          <p class="muted small hidden" id="claim-done-msg">Claimed and safe on your account ✓ Find it any time at <a href="/account">/account</a>.</p>
         </section>
 
         <!-- (e) Ready to play -->

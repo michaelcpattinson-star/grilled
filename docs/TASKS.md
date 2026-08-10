@@ -2,10 +2,10 @@
 
 ## Status Summary
 - **Total tasks:** 28
-- **Completed:** 18
+- **Completed:** 28
 - **In progress:** 0
 - **Blocked:** 0
-- **Remaining effort:** ~2 engineer-days equivalent
+- **Remaining effort:** 0 — all phases complete
 - **Last updated:** 2026-08-10
 
 ## Phase 0: Foundation
@@ -50,24 +50,24 @@
   - Depends on: T17
 
 ## Phase 4: Accounts + Payments + Marketing (v2)
-- [ ] T19. config.js (env-driven, safe local defaults) + db migration: users/magic_tokens/sessions tables, events.plan/paidAt/stripeSessionId/userId columns `[effort: S]` `[feature: F9,F10]`
-- [ ] T20. mail/mailer.js: provider-agnostic adapter (console default, resend via fetch), test-injectable transport `[effort: S]` `[feature: F9]`
+- [x] T19. config.js (env-driven, safe local defaults) + db migration: users/magic_tokens/sessions tables, events.plan/paidAt/stripeSessionId/userId columns `[effort: S]` `[feature: F9,F10]`
+- [x] T20. mail/mailer.js: provider-agnostic adapter (console default, resend via fetch), test-injectable transport `[effort: S]` `[feature: F9]`
   - Depends on: T19
-- [ ] T21. routes/auth.js: request-link, /auth/verify (session cookie + optional event claim), logout, /api/me, claim endpoint; wire into index.js `[effort: M]` `[feature: F9]`
+- [x] T21. routes/auth.js: request-link, /auth/verify (session cookie + optional event claim), logout, /api/me, claim endpoint; wire into index.js `[effort: M]` `[feature: F9]`
   - Depends on: T20
-- [ ] T22. payments/stripe.js: checkout-session create via fetch, webhook HMAC verify, verify-by-session fallback; routes: checkout, webhook (raw body), dev-unlock (payments-off only) `[effort: M]` `[feature: F10]`
+- [x] T22. payments/stripe.js: checkout-session create via fetch, webhook HMAC verify, verify-by-session fallback; routes: checkout, webhook (raw body), dev-unlock (payments-off only) `[effort: M]` `[feature: F10]`
   - Depends on: T19
-- [ ] T23. Free-plan game-time enforcement: gameManager uses first 15 approved questions + no superlatives when plan='free' `[effort: S]` `[feature: F10]`
+- [x] T23. Free-plan game-time enforcement: gameManager uses first 15 approved questions + no superlatives when plan='free' `[effort: S]` `[feature: F10]`
   - Depends on: T22
-- [ ] T24. Frontend: account.html (sign-in + your events), dashboard claim card + plan/upgrade card + free-cap notice, auth-aware header `[effort: M]` `[feature: F9,F10]`
+- [x] T24. Frontend: account.html (sign-in + your events), dashboard claim card + plan/upgrade card + free-cap notice, auth-aware header `[effort: M]` `[feature: F9,F10]`
   - Depends on: T21, T22
-- [ ] T25. Marketing: pricing.html, how.html, landing refresh (demo CTA, 30-day trust line, nav) `[effort: S]` `[feature: F11]`
+- [x] T25. Marketing: pricing.html, how.html, landing refresh (demo CTA, 30-day trust line, nav) `[effort: S]` `[feature: F11]`
 
 ## Phase 5: Launch v2
-- [ ] T26. render.yaml + DEPLOY.md + README refresh `[effort: S]` `[feature: F12]`
-- [ ] T27. Tests: auth flow (magic link via capture transport, claim, expiry, no-enumeration), payments (flag off/on, webhook signature good/bad/replay, idempotency, free-cap game enforcement) `[effort: M]` `[feature: QA]`
+- [x] T26. render.yaml + DEPLOY.md + README refresh `[effort: S]` `[feature: F12]`
+- [x] T27. Tests: auth flow (magic link via capture transport, claim, expiry, no-enumeration), payments (flag off/on, webhook signature good/bad/replay, idempotency, free-cap game enforcement) `[effort: M]` `[feature: QA]`
   - Depends on: T24
-- [ ] T28. Full test-and-fix pass: whole suite + boot + E2E walkthrough (create → submit incl. XSS payload → build → moderate → ready → host + 2 players → podium) + TEST_REPORT v2 `[effort: M]` `[feature: QA]`
+- [x] T28. Full test-and-fix pass: whole suite + boot + E2E walkthrough (create → submit incl. XSS payload → build → moderate → ready → host + 2 players → podium) + TEST_REPORT v2 `[effort: M]` `[feature: QA]`
   - Depends on: T26, T27
 
 ## Blocked / Needs Decision
@@ -78,3 +78,4 @@
 
 ## PM Log
 - 2026-08-10 — Initial breakdown from SPEC v1 + ARCHITECTURE v1. Two L tasks (T6, T8) pre-split internally. Critical path: T1→T2→T5/T6→T7→T8→T9→T13/T14→T17. Frontend pages T10/T12 parallelisable early.
+- 2026-08-10 (v2) — Phase 4/5 breakdown added (T19–T28) and completed same day: accounts, payments, marketing, deploy docs, v2 test suite (12 new tests), full E2E walkthrough.

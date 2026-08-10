@@ -59,13 +59,36 @@
     if (msg) $('#load-error-msg').textContent = msg;
   }
 
+  // Landed back from Stripe Checkout (?session_id=…) or a claim link (?claimed=1)?
+  // Confirm/celebrate, then clean the URL so refreshes stay tidy.
+  var landingParams = new URLSearchParams(location.search);
+  var checkoutSessionId = landingParams.get('session_id');
+  var justClaimed = landingParams.get('claimed');
+  if (checkoutSessionId || justClaimed) {
+    history.replaceState(null, '', location.pathname);
+  }
+
+  function confirmPaymentIfNeeded() {
+    if (!checkoutSessionId) return Promise.resolve();
+    return G.api('/api/events/' + encodeURIComponent(organiserKey) + '/confirm-payment', {
+      method: 'POST',
+      body: { sessionId: checkoutSessionId }
+    })
+      .then(function (data) {
+        if (data && data.plan === 'full') G.toast('Full Grilling unlocked. Scorch responsibly 🔥');
+      })
+      .catch(function () { /* webhook will catch up; the poll will reflect it */ });
+  }
+
   // Initial load
-  fetchEvent()
+  confirmPaymentIfNeeded()
+    .then(fetchEvent)
     .then(function (data) {
       event = data;
       loadingEl.classList.add('hidden');
       dashEl.classList.remove('hidden');
       wireStaticControls();
+      if (justClaimed) G.toast('Claimed — this quiz is now on your account ✓');
       renderEvent();
       var counts = event.questionCounts || {};
       var totalQs = (counts.pending || 0) + (counts.approved || 0) + (counts.binned || 0);
@@ -110,7 +133,10 @@
       if (radio) radio.checked = true;
     }
 
-    // Locked vs collecting layout
+    renderPlan();
+    renderClaim();
+
+    // Locked vs collecting layout (plan + claim cards stay in both states)
     if (isLocked()) {
       $('#share-card').classList.add('hidden');
       $('#build-card').classList.add('hidden');
@@ -136,10 +162,39 @@
   function statusHint() {
     var subs = event.submissionCount || 0;
     var counts = event.questionCounts || {};
+    var limit = event.freeQuestionLimit || 15;
+    if (event.plan !== 'full' && (counts.approved || 0) > limit) {
+      return 'Heads up: on the free plan the game plays your first ' + limit +
+        ' approved questions. Go Full Grilling below to play all ' + (counts.approved || 0) + '.';
+    }
     if (subs === 0) return '0 submissions — chase your mates. The group chat needs a nudge.';
     if (subs < 5) return subs + ' in so far. Five or more makes a much juicier quiz — keep chasing.';
     if ((counts.approved || 0) >= 10) return 'Plenty approved — you can lock it in whenever you like.';
     return 'Nice haul. Build the quiz below, then approve your favourites.';
+  }
+
+  function renderPlan() {
+    var isFull = event.plan === 'full';
+    var badge = $('#plan-badge');
+    badge.textContent = isFull ? 'Full Grilling 🔥' : 'Free Taster';
+    badge.classList.toggle('plan-free', !isFull);
+    $('#plan-free-zone').classList.toggle('hidden', isFull);
+    $('#plan-full-zone').classList.toggle('hidden', !isFull);
+    if (!isFull) {
+      // Payments off (local/dev) → show the labelled dev unlock instead of checkout
+      $('#upgrade-btn').classList.toggle('hidden', !event.paymentsEnabled);
+      $('#dev-unlock-btn').classList.toggle('hidden', !!event.paymentsEnabled);
+    }
+  }
+
+  function renderClaim() {
+    var claimed = !!event.claimed;
+    $('#claim-form-zone').classList.toggle('hidden', claimed);
+    var done = $('#claim-done-msg');
+    done.classList.toggle('hidden', !claimed);
+    if (claimed && !event.claimedByYou) {
+      done.textContent = 'This quiz is claimed to an email account. Sign in at /account to see it listed.';
+    }
   }
 
   function toneLabel(tone) {
@@ -313,6 +368,75 @@
   // ---------- static controls ----------
 
   function wireStaticControls() {
+    // Upgrade → Stripe Checkout
+    $('#upgrade-btn').addEventListener('click', function () {
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Opening the till…';
+      G.api('/api/events/' + encodeURIComponent(organiserKey) + '/checkout', { method: 'POST' })
+        .then(function (data) {
+          if (data && data.url) {
+            location.href = data.url;
+            return;
+          }
+          btn.disabled = false;
+          btn.textContent = 'Go Full Grilling — £19 🔥';
+          if (data && data.paymentsEnabled === false) {
+            G.toast('Payments are switched off on this server.', 'bad');
+          }
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          btn.textContent = 'Go Full Grilling — £19 🔥';
+          G.toast(err.message, 'bad');
+        });
+    });
+
+    // Dev unlock (payments off only)
+    $('#dev-unlock-btn').addEventListener('click', function () {
+      var btn = this;
+      btn.disabled = true;
+      G.api('/api/events/' + encodeURIComponent(organiserKey) + '/dev-unlock', { method: 'POST' })
+        .then(function () {
+          return fetchEvent().then(function (d) {
+            event = d;
+            renderEvent();
+            G.toast('Full Grilling unlocked (dev mode) 🔥');
+          });
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          G.toast(err.message, 'bad');
+        });
+    });
+
+    // Claim by email
+    $('#claim-btn').addEventListener('click', function () {
+      var emailInput = $('#claim-email');
+      var email = emailInput.value.trim();
+      if (!email) { G.toast('Pop your email in first.', 'bad'); return; }
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      G.api('/api/events/' + encodeURIComponent(organiserKey) + '/claim', {
+        method: 'POST',
+        body: { email: email }
+      })
+        .then(function () {
+          btn.textContent = 'Link sent ✓';
+          G.toast('Check your inbox — tap the link to finish claiming.');
+          setTimeout(function () {
+            btn.disabled = false;
+            btn.textContent = 'Claim this quiz';
+          }, 4000);
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          btn.textContent = 'Claim this quiz';
+          G.toast(err.message, 'bad');
+        });
+    });
+
     G.wireCopy($('#copy-link-btn'), function () { return G.absUrl(event.submissionUrl); });
     G.wireCopy($('#copy-whatsapp-btn'), whatsappMessage);
     G.wireCopy($('#copy-host-btn'), function () { return G.absUrl(event.hostUrl); });

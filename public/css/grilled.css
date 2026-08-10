@@ -236,6 +236,7 @@ select:focus-visible {
 .field .hint { color: var(--faint); font-size: 0.82rem; margin-top: 0.3rem; }
 
 input[type="text"],
+input[type="email"],
 textarea {
   width: 100%;
   background: var(--bg-2);
@@ -247,8 +248,10 @@ textarea {
   font-family: var(--sans);
 }
 input[type="text"]::placeholder,
+input[type="email"]::placeholder,
 textarea::placeholder { color: var(--faint); }
 input[type="text"]:focus,
+input[type="email"]:focus,
 textarea:focus { border-color: var(--flame); outline: none; }
 
 textarea { min-height: 6.5rem; resize: vertical; }
@@ -386,7 +389,8 @@ textarea { min-height: 6.5rem; resize: vertical; }
   align-items: stretch;
   margin: 0.5rem 0 0.9rem;
 }
-.copy-line input[type="text"] { flex: 1; min-width: 0; font-size: 0.9rem; }
+.copy-line input[type="text"],
+.copy-line input[type="email"] { flex: 1; min-width: 0; font-size: 0.9rem; }
 
 .stat-row { display: flex; flex-wrap: wrap; gap: 0.9rem; }
 .stat {
@@ -986,4 +990,56 @@ body.play-body { display: flex; flex-direction: column; min-height: 100vh; }
     animation-duration: 0.001s !important;
     transition-duration: 0.001s !important;
   }
+}
+
+/* ---------- v2: pricing, accounts, plan cards ---------- */
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.2rem;
+  margin-top: 1rem;
+}
+.price-card { display: flex; flex-direction: column; }
+.price-card h2 { margin-top: 0; }
+.price-card .btn { margin-top: auto; }
+.price-featured { border: 2px solid var(--flame); }
+.price-figure {
+  font-family: var(--display-font, inherit);
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--ember);
+  margin: 0.2rem 0 0.1rem;
+  line-height: 1.1;
+}
+.price-note { font-size: 0.95rem; font-weight: 400; color: var(--muted); }
+.tick-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.8rem 0 1.2rem;
+}
+.tick-list li {
+  padding: 0.35rem 0 0.35rem 1.6rem;
+  position: relative;
+}
+.tick-list li::before {
+  content: "🔥";
+  position: absolute;
+  left: 0;
+  font-size: 0.85rem;
+  top: 0.5rem;
+}
+.plan-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--flame);
+  color: var(--ink, #1a1310);
+  vertical-align: middle;
+}
+.plan-badge.plan-free {
+  background: transparent;
+  border: 1px solid var(--muted);
+  color: var(--muted);
 }
