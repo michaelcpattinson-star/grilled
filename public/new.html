@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create a quiz — Grilled</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+  <link rel="stylesheet" href="/css/grilled.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-head">
+      <a class="logo" href="/">Grilled<span class="spark" aria-hidden="true">🔥</span></a>
+    </header>
+
+    <main>
+      <h1 class="display" style="font-size: clamp(2.2rem, 9vw, 3.4rem);">Who's for the grill?</h1>
+      <p class="muted">Thirty seconds of admin, then the fun starts. No account needed — your dashboard link is the key.</p>
+
+      <form id="new-form" class="card" novalidate>
+        <div class="field">
+          <label for="guest-name">Guest of honour</label>
+          <input type="text" id="guest-name" name="name" maxlength="60" autocomplete="off"
+                 placeholder="e.g. Dave" required>
+          <p class="hint">First name is plenty. They'll never see this coming.</p>
+          <p class="field-error hidden" id="name-error">Give us a name — we can't grill nobody.</p>
+        </div>
+
+        <div class="field">
+          <label for="occasion">What's the occasion?</label>
+          <input type="text" id="occasion" name="occasion" maxlength="60" autocomplete="off"
+                 placeholder="e.g. Dave's stag do" required>
+          <div class="chip-row" role="group" aria-label="Quick picks">
+            <button type="button" class="chip" data-occasion="Hen do">Hen do</button>
+            <button type="button" class="chip" data-occasion="Stag do">Stag do</button>
+            <button type="button" class="chip" data-occasion="30th birthday">30th</button>
+            <button type="button" class="chip" data-occasion="40th birthday">40th</button>
+            <button type="button" class="chip" data-occasion="Leaving do">Leaving do</button>
+          </div>
+          <p class="field-error hidden" id="occasion-error">What's the do? We need an occasion.</p>
+        </div>
+
+        <fieldset class="field" style="border: none; padding: 0; margin: 0 0 1.15rem;">
+          <legend class="field-label" style="font-weight: 700; margin-bottom: 0.35rem; padding: 0;">How hot should it get?</legend>
+          <div class="tone-grid">
+            <label class="tone-card">
+              <input type="radio" name="tone" value="gentle">
+              <span class="tone-name">Gentle 🔅</span>
+              <span class="tone-desc">Warm ribbing. Nan-safe. Everyone stays friends.</span>
+            </label>
+            <label class="tone-card">
+              <input type="radio" name="tone" value="medium" checked>
+              <span class="tone-name">Medium 🔥</span>
+              <span class="tone-desc">Proper teasing. A few gasps. The sweet spot.</span>
+            </label>
+            <label class="tone-card">
+              <input type="radio" name="tone" value="roast">
+              <span class="tone-name">Full Roast 🌶️</span>
+              <span class="tone-desc">Scorched earth. You approve every question, so breathe.</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="btn-row">
+          <button type="submit" class="btn btn-primary btn-big" id="create-btn">Fire up the quiz</button>
+          <a class="btn btn-ghost" href="/">Back</a>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="/js/shared.js"></script>
+  <script src="/js/new.js"></script>
+</body>
+</html>

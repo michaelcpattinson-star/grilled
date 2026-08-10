@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Join the game — Grilled</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+  <link rel="stylesheet" href="/css/grilled.css">
+</head>
+<body class="play-body">
+  <div id="conn-bar" class="conn-bar hidden" role="alert">Connection lost — hold tight, reconnecting…</div>
+
+  <div class="play-wrap">
+    <header class="play-head">
+      <a class="logo" href="/">Grilled<span class="spark" aria-hidden="true">🔥</span></a>
+      <div class="play-me hidden" id="play-me">
+        <span id="me-name"></span>
+        <span class="me-score" id="me-score">0</span>
+      </div>
+    </header>
+
+    <!-- Join card -->
+    <main class="play-stage" id="join-screen">
+      <form id="join-form" class="card" novalidate>
+        <h1 class="display" style="font-size: clamp(1.8rem, 8vw, 2.6rem);">Get on the grill</h1>
+        <p class="muted small">The code's on the big screen.</p>
+        <div class="field">
+          <label for="code-input">Game code</label>
+          <input type="text" id="code-input" class="code-input" maxlength="4" autocomplete="off"
+                 autocapitalize="characters" spellcheck="false" inputmode="text" placeholder="ABCD">
+          <p class="field-error hidden" id="code-error">Four letters — check the big screen.</p>
+        </div>
+        <div class="field">
+          <label for="nick-input">Your nickname</label>
+          <input type="text" id="nick-input" maxlength="20" autocomplete="off" placeholder="e.g. Quizzy Rascal">
+          <p class="field-error hidden" id="nick-error">You need a name — how else do we crown you?</p>
+        </div>
+        <button type="submit" class="btn btn-primary btn-big" id="join-btn" style="width: 100%;">Join the game</button>
+      </form>
+    </main>
+
+    <!-- Game stage (rendered from state) -->
+    <main class="play-stage hidden" id="stage" aria-live="polite"></main>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/shared.js"></script>
+  <script src="/js/play.js"></script>
+</body>
+</html>

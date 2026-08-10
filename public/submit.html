@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spill the dirt — Grilled</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+  <link rel="stylesheet" href="/css/grilled.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-head">
+      <a class="logo" href="/">Grilled<span class="spark" aria-hidden="true">🔥</span></a>
+    </header>
+
+    <main>
+      <!-- Loading -->
+      <div id="loading" class="screen-msg">
+        <div class="spinner" aria-hidden="true"></div>
+        <p class="muted">Sharpening the skewers…</p>
+      </div>
+
+      <!-- Load error -->
+      <div id="load-error" class="screen-msg hidden">
+        <span class="big-emoji" aria-hidden="true">🤔</span>
+        <h1 class="display">That link doesn't look right</h1>
+        <p class="muted" id="load-error-msg">Check the link from the group chat and try again.</p>
+      </div>
+
+      <!-- Closed -->
+      <div id="closed" class="screen-msg hidden">
+        <span class="big-emoji" aria-hidden="true">🔥</span>
+        <h1 class="display">The quiz has closed</h1>
+        <p class="muted">The dirt has been dished and the grill is lit — see you at the party 🔥</p>
+      </div>
+
+      <!-- Form -->
+      <div id="form-screen" class="hidden">
+        <div class="submit-intro">
+          <h1 class="display" id="intro-title">Help us grill them</h1>
+          <p class="muted" id="intro-sub">They'll never know who said what. Answer as many or as few as you like — one is enough.</p>
+        </div>
+        <form id="dirt-form" class="card" novalidate>
+          <div id="prompts-zone"></div>
+          <button type="submit" class="btn btn-primary btn-big" id="dish-btn" style="width: 100%;">Dish the dirt 🔥</button>
+          <p class="small muted center" style="margin: 0.7rem 0 0;">100% anonymous. Not even we know who you are.</p>
+        </form>
+      </div>
+
+      <!-- Thanks -->
+      <div id="thanks" class="screen-msg hidden">
+        <span class="big-emoji" aria-hidden="true">😈</span>
+        <h1 class="display">The dirt has been dished.</h1>
+        <p class="muted">Lovely work. Your secrets are safe with us — well, until game night.</p>
+        <button type="button" class="btn btn-primary btn-big" id="again-btn">Add another story</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/shared.js"></script>
+  <script src="/js/submit.js"></script>
+</body>
+</html>

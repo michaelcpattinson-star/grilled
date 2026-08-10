@@ -1,0 +1,26 @@
+{
+  "name": "grilled",
+  "version": "1.0.0",
+  "description": "Live party quizzes about the guest of honour, built from stories their mates secretly submit.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test 'test/*.test.js'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1",
+    "socket.io-client": "^4.8.3",
+    "supertest": "^7.2.2"
+  }
+}

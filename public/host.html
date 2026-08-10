@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Host screen — Grilled</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+  <link rel="stylesheet" href="/css/grilled.css">
+</head>
+<body class="host-body">
+  <div id="conn-bar" class="conn-bar hidden" role="alert">Connection lost — trying to get back on the grill…</div>
+
+  <main class="host-stage" id="stage" aria-live="polite">
+    <div class="screen-msg">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="muted">Lighting the host screen…</p>
+    </div>
+  </main>
+
+  <footer class="host-bar">
+    <span class="bar-brand">Grilled 🔥</span>
+    <span class="bar-hint" id="bar-hint">Space or Enter also works</span>
+    <button type="button" class="btn btn-primary btn-big" id="next-btn" disabled>…</button>
+  </footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/shared.js"></script>
+  <script src="/js/host.js"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your account — Grilled</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+  <link rel="stylesheet" href="/css/grilled.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-head">
+      <a class="logo" href="/">Grilled<span class="spark" aria-hidden="true">🔥</span></a>
+      <span class="muted small">Your account</span>
+    </header>
+
+    <main>
+      <!-- Loading -->
+      <div id="loading" class="screen-msg">
+        <div class="spinner" aria-hidden="true"></div>
+        <p class="muted">Checking who's at the door…</p>
+      </div>
+
+      <!-- Signed out: magic-link form -->
+      <div id="signin" class="hidden">
+        <h1 class="display" style="font-size: clamp(2rem, 8vw, 3rem);">Find your quizzes</h1>
+        <p class="muted">No passwords here — we email you a magic link and that's the whole ceremony.</p>
+        <form id="signin-form" class="card" novalidate>
+          <div class="field">
+            <label for="email-input">Your email</label>
+            <input type="email" id="email-input" autocomplete="email" placeholder="you@example.com" maxlength="254" required>
+            <p class="hint">Only used to sign you in and find your events. No newsletter, promise.</p>
+          </div>
+          <button type="submit" class="btn btn-primary btn-big" id="send-link-btn" style="width: 100%;">Email me a magic link ✨</button>
+        </form>
+        <div id="link-sent" class="card hidden">
+          <h2>Check your inbox 📬</h2>
+          <p class="muted">If that email rings a bell with us (or even if it doesn't — we don't tell), a sign-in link is on its way. It works once and expires in 15 minutes.</p>
+        </div>
+      </div>
+
+      <!-- Signed in: your events -->
+      <div id="signedin" class="hidden">
+        <h1 class="display" style="font-size: clamp(2rem, 8vw, 3rem);">Your quizzes</h1>
+        <p class="muted" id="whoami"></p>
+        <div id="events-zone"></div>
+        <div class="btn-row" style="margin-top: 1.2rem;">
+          <a class="btn btn-primary" href="/new">Start another one</a>
+          <button type="button" class="btn btn-ghost" id="logout-btn">Sign out</button>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-foot">
+      <p>Events self-destruct 30 days after creation — the dirt doesn't hang about.</p>
+    </footer>
+  </div>
+
+  <script src="/js/shared.js"></script>
+  <script src="/js/account.js"></script>
+</body>
+</html>

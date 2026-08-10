@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your quiz — Grilled</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+  <link rel="stylesheet" href="/css/grilled.css">
+</head>
+<body>
+  <div class="wrap wrap-wide">
+    <header class="site-head">
+      <a class="logo" href="/">Grilled<span class="spark" aria-hidden="true">🔥</span></a>
+      <span class="muted small">Organiser dashboard</span>
+    </header>
+
+    <main>
+      <!-- Loading -->
+      <div id="loading" class="screen-msg">
+        <div class="spinner" aria-hidden="true"></div>
+        <p class="muted">Warming up your dashboard…</p>
+      </div>
+
+      <!-- Load error -->
+      <div id="load-error" class="screen-msg hidden">
+        <span class="big-emoji" aria-hidden="true">💀</span>
+        <h1 class="display">Can't find that quiz</h1>
+        <p class="muted" id="load-error-msg">That organiser link doesn't look right.</p>
+        <p><a class="btn btn-primary" href="/new">Start a new one</a></p>
+      </div>
+
+      <!-- Dashboard proper -->
+      <div id="dash" class="hidden">
+        <h1 class="display" id="dash-title" style="font-size: clamp(2rem, 8vw, 3.2rem);"></h1>
+        <p class="muted" id="dash-sub"></p>
+
+        <div class="banner" role="note">
+          <span class="banner-icon" aria-hidden="true">🔖</span>
+          <span><strong>This link is your key.</strong> Bookmark this page now — there are no accounts and lost links can't be recovered.</span>
+        </div>
+
+        <!-- (b) Share card -->
+        <section class="card" id="share-card" aria-labelledby="share-heading">
+          <h2 id="share-heading">Get the dirt in 🕵️</h2>
+          <p class="muted small">Send this to their mates — <strong>not</strong> to the guest of honour. Submissions are anonymous.</p>
+          <label class="small muted" for="submit-url">Submission link</label>
+          <div class="copy-line">
+            <input type="text" id="submit-url" readonly value="">
+            <button type="button" class="btn btn-ghost" id="copy-link-btn">Copy link</button>
+          </div>
+          <button type="button" class="btn btn-primary" id="copy-whatsapp-btn">Copy WhatsApp message 💬</button>
+          <p class="hint small muted" style="margin-top: 0.5rem;">A pre-written nudge for the group chat — just paste and send.</p>
+        </section>
+
+        <!-- (c) Status -->
+        <section class="card" id="status-card" aria-labelledby="status-heading">
+          <h2 id="status-heading">The haul so far</h2>
+          <div class="stat-row">
+            <div class="stat"><span class="stat-num" id="stat-subs">0</span><span class="stat-label">submissions</span></div>
+            <div class="stat"><span class="stat-num" id="stat-approved">0</span><span class="stat-label">approved questions</span></div>
+            <div class="stat"><span class="stat-num" id="stat-pending">0</span><span class="stat-label">awaiting review</span></div>
+          </div>
+          <p class="muted small" id="status-hint" style="margin: 0.8rem 0 0;"></p>
+        </section>
+
+        <!-- (d) Build & moderate -->
+        <section class="card" id="build-card" aria-labelledby="build-heading">
+          <h2 id="build-heading">Build the quiz 🔨</h2>
+          <p class="muted small">We'll turn the submissions into quiz rounds. Rebuild any time — your edits and binned questions stick.</p>
+          <fieldset style="border: none; padding: 0; margin: 0 0 1rem;">
+            <legend class="small muted" style="padding: 0; margin-bottom: 0.4rem;">Tone</legend>
+            <div class="tone-grid" id="tone-grid">
+              <label class="tone-card"><input type="radio" name="dash-tone" value="gentle"><span class="tone-name">Gentle 🔅</span><span class="tone-desc">Nan-safe.</span></label>
+              <label class="tone-card"><input type="radio" name="dash-tone" value="medium"><span class="tone-name">Medium 🔥</span><span class="tone-desc">Proper teasing.</span></label>
+              <label class="tone-card"><input type="radio" name="dash-tone" value="roast"><span class="tone-name">Full Roast 🌶️</span><span class="tone-desc">Scorched earth.</span></label>
+            </div>
+          </fieldset>
+          <div class="btn-row">
+            <button type="button" class="btn btn-primary btn-big" id="build-btn">Build my quiz</button>
+          </div>
+          <div id="questions-zone" style="margin-top: 0.5rem;"></div>
+        </section>
+
+        <!-- (e) Ready to play -->
+        <section class="card" id="ready-card" aria-labelledby="ready-heading">
+          <h2 id="ready-heading">Game night 🎉</h2>
+          <p class="muted small">When your questions are approved (you need at least 10), lock it in. This closes submissions for good.</p>
+          <button type="button" class="btn btn-primary btn-big" id="ready-btn">Ready to play</button>
+        </section>
+
+        <!-- Locked state -->
+        <section class="card hidden" id="locked-card" aria-labelledby="locked-heading">
+          <h2 id="locked-heading">The grill is hot 🔥</h2>
+          <p class="muted">Submissions are closed and the quiz is locked in. Players join at <strong id="join-host"></strong> with this code:</p>
+          <div class="code-box">
+            <span class="game-code" id="game-code"></span>
+          </div>
+          <p class="muted small">Put the host screen on the biggest telly you can find:</p>
+          <div class="copy-line">
+            <input type="text" id="host-url" readonly value="">
+            <button type="button" class="btn btn-ghost" id="copy-host-btn">Copy link</button>
+          </div>
+          <a class="btn btn-primary btn-big" id="open-host-link" href="#">Open host screen 📺</a>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-foot">
+      <p>Grilled 🔥 — the dirt stays between us.</p>
+    </footer>
+  </div>
+
+  <script src="/js/shared.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>
