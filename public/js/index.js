@@ -1,6 +1,21 @@
 'use strict';
-/* Grilled — landing page: demo button. */
+/* Grilled — landing page: rotating grill target + demo button. */
 (function () {
+  // "Time to grill your ______." — cycle the victim
+  var target = G.$('#grill-target');
+  if (target) {
+    var victims = ['bestie', 'best mate', 'bride-to-be', 'stag', 'birthday boy', 'birthday girl', 'work wife', 'old man'];
+    var i = 0;
+    setInterval(function () {
+      i = (i + 1) % victims.length;
+      target.classList.remove('word-swap');
+      // restart the CSS animation
+      void target.offsetWidth;
+      target.textContent = victims[i];
+      target.classList.add('word-swap');
+    }, 2400);
+  }
+
   var demoBtn = G.$('#demo-btn');
   if (!demoBtn) return;
 
