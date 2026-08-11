@@ -44,6 +44,10 @@ function createCheckoutSession({ eventName, organiserKey, tier = 'full', pricePe
     'line_items[0][price_data][currency]': 'gbp',
     'line_items[0][price_data][unit_amount]': String(pricePence || config.FULL_PRICE_PENCE),
     'line_items[0][price_data][product_data][name]': productLabel || `Full Grilling — quiz about ${eventName}`,
+    // Tax classification — required when Stripe Managed Payments is enabled
+    // (default on newer accounts); harmless otherwise. Grilled is an
+    // electronically supplied service.
+    'line_items[0][price_data][product_data][tax_code]': config.STRIPE_TAX_CODE,
     'line_items[0][quantity]': '1',
     'metadata[organiserKey]': organiserKey,
     'metadata[tier]': tier,

@@ -16,6 +16,8 @@ const config = {
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || '',
   FULL_PRICE_PENCE: Number(process.env.FULL_PRICE_PENCE) || 1900,
   SPEECH_PRICE_PENCE: Number(process.env.SPEECH_PRICE_PENCE) || 5000,
+  // 'General - Electronically Supplied Services' — required by Stripe Managed Payments
+  STRIPE_TAX_CODE: process.env.STRIPE_TAX_CODE || 'txcd_10000000',
   FREE_QUESTION_LIMIT: Number(process.env.FREE_QUESTION_LIMIT) || 15,
 
   // Mail — 'console' logs the message (magic link clickable from the
