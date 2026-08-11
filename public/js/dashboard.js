@@ -174,17 +174,48 @@
   }
 
   function renderPlan() {
-    var isFull = event.plan === 'full';
+    var isPaid = event.plan === 'full' || event.plan === 'speech';
     var badge = $('#plan-badge');
-    badge.textContent = isFull ? 'Full Grilling 🔥' : 'Free Taster';
-    badge.classList.toggle('plan-free', !isFull);
-    $('#plan-free-zone').classList.toggle('hidden', isFull);
-    $('#plan-full-zone').classList.toggle('hidden', !isFull);
-    if (!isFull) {
+    badge.textContent = event.plan === 'speech' ? 'Roast & Toast 🥂' : (isPaid ? 'Full Grilling 🔥' : 'Free Taster');
+    badge.classList.toggle('plan-free', !isPaid);
+    $('#plan-free-zone').classList.toggle('hidden', isPaid);
+    $('#plan-full-zone').classList.toggle('hidden', !isPaid);
+    if (!isPaid) {
       // Payments off (local/dev) → show the labelled dev unlock instead of checkout
       $('#upgrade-btn').classList.toggle('hidden', !event.paymentsEnabled);
       $('#dev-unlock-btn').classList.toggle('hidden', !!event.paymentsEnabled);
     }
+    renderSpeech();
+  }
+
+  var speechLoaded = false;
+  function renderSpeech() {
+    var unlocked = event.plan === 'speech';
+    $('#speech-badge').classList.toggle('plan-free', !unlocked);
+    $('#speech-locked-zone').classList.toggle('hidden', unlocked);
+    $('#speech-unlocked-zone').classList.toggle('hidden', !unlocked);
+    if (!unlocked) {
+      $('#speech-buy-btn').classList.toggle('hidden', !event.paymentsEnabled);
+      $('#speech-dev-unlock-btn').classList.toggle('hidden', !!event.paymentsEnabled);
+      return;
+    }
+    if (speechLoaded) return;
+    speechLoaded = true;
+    G.api('/api/events/' + encodeURIComponent(organiserKey) + '/speech')
+      .then(function (data) {
+        if (data.speech) showSpeechText(data.speech, false);
+      })
+      .catch(function () { speechLoaded = false; });
+  }
+
+  function showSpeechText(text, toastIt) {
+    var ta = $('#speech-text');
+    ta.value = text;
+    ta.classList.remove('hidden');
+    $('#speech-save-btn').classList.remove('hidden');
+    $('#speech-copy-btn').classList.remove('hidden');
+    $('#speech-build-btn').textContent = 'Rebuild from scratch';
+    if (toastIt) G.toast('Speech served. Read it out loud once before the night 🥂');
   }
 
   function renderClaim() {
@@ -409,6 +440,105 @@
           G.toast(err.message, 'bad');
         });
     });
+
+    // Roast & Toast: buy (checkout tier=speech)
+    $('#speech-buy-btn').addEventListener('click', function () {
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Opening the till…';
+      G.api('/api/events/' + encodeURIComponent(organiserKey) + '/checkout', {
+        method: 'POST',
+        body: { tier: 'speech' }
+      })
+        .then(function (data) {
+          if (data && data.url) { location.href = data.url; return; }
+          btn.disabled = false;
+          btn.textContent = 'Get Roast & Toast — £50 🥂';
+          if (data && data.paymentsEnabled === false) {
+            G.toast('Payments are switched off on this server.', 'bad');
+          }
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          btn.textContent = 'Get Roast & Toast — £50 🥂';
+          G.toast(err.message, 'bad');
+        });
+    });
+
+    // Roast & Toast: dev unlock (payments off only)
+    $('#speech-dev-unlock-btn').addEventListener('click', function () {
+      var btn = this;
+      btn.disabled = true;
+      G.api('/api/events/' + encodeURIComponent(organiserKey) + '/dev-unlock', {
+        method: 'POST',
+        body: { tier: 'speech' }
+      })
+        .then(function () {
+          return fetchEvent().then(function (d) {
+            event = d;
+            renderEvent();
+            G.toast('Roast & Toast unlocked (dev mode) 🥂');
+          });
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          G.toast(err.message, 'bad');
+        });
+    });
+
+    // Speech: build/rebuild — two-tap confirm when it would overwrite text
+    var speechBuildArmed = false;
+    var speechBuildTimer = null;
+    $('#speech-build-btn').addEventListener('click', function () {
+      var btn = this;
+      var hasText = !!$('#speech-text').value.trim();
+      if (hasText && !speechBuildArmed) {
+        speechBuildArmed = true;
+        btn.textContent = 'Sure? This replaces your edits — tap again';
+        clearTimeout(speechBuildTimer);
+        speechBuildTimer = setTimeout(function () {
+          speechBuildArmed = false;
+          btn.textContent = 'Rebuild from scratch';
+        }, 5000);
+        return;
+      }
+      clearTimeout(speechBuildTimer);
+      speechBuildArmed = false;
+      btn.disabled = true;
+      btn.textContent = 'Writing…';
+      G.api('/api/events/' + encodeURIComponent(organiserKey) + '/speech/build', { method: 'POST' })
+        .then(function (data) {
+          btn.disabled = false;
+          showSpeechText(data.speech, true);
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          btn.textContent = hasText ? 'Rebuild from scratch' : 'Write my speech';
+          G.toast(err.message, 'bad');
+        });
+    });
+
+    // Speech: save edits
+    $('#speech-save-btn').addEventListener('click', function () {
+      var btn = this;
+      var text = $('#speech-text').value;
+      if (!text.trim()) { G.toast('The speech needs some words.', 'bad'); return; }
+      btn.disabled = true;
+      G.api('/api/events/' + encodeURIComponent(organiserKey) + '/speech', {
+        method: 'PATCH',
+        body: { text: text }
+      })
+        .then(function () {
+          btn.disabled = false;
+          G.toast('Saved. Practise in the mirror.');
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          G.toast(err.message, 'bad');
+        });
+    });
+
+    G.wireCopy($('#speech-copy-btn'), function () { return $('#speech-text').value; });
 
     // Claim by email
     $('#claim-btn').addEventListener('click', function () {

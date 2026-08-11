@@ -34,7 +34,8 @@ class Game {
       .prepare(`SELECT id, roundKey, questionText, options, correctIndex, sourceText
                 FROM questions WHERE eventId = ? AND status = 'approved' ORDER BY sortOrder, id`)
       .all(eventId);
-    if (this.plan !== 'full') rows = rows.slice(0, config.FREE_QUESTION_LIMIT);
+    this.isPaid = this.plan === 'full' || this.plan === 'speech';
+    if (!this.isPaid) rows = rows.slice(0, config.FREE_QUESTION_LIMIT);
     this.rounds = [];
     const byKey = new Map();
     for (const r of rows) {
@@ -221,7 +222,7 @@ class Game {
   }
 
   superlatives() {
-    if (this.plan !== 'full') return []; // the Full Grilling sweetener
+    if (!this.isPaid) return []; // the Full Grilling sweetener
     const players = [...this.players.values()];
     if (!players.length) return [];
     const out = [];

@@ -95,6 +95,25 @@
           </div>
         </section>
 
+        <!-- Roast & Toast speech -->
+        <section class="card" id="speech-card" aria-labelledby="speech-heading">
+          <h2 id="speech-heading">The speech 🥂 <span class="plan-badge plan-free" id="speech-badge">Roast &amp; Toast</span></h2>
+          <div id="speech-locked-zone">
+            <p class="muted small">Dreading the speech? We'll turn the group chat's dirt into a ready-to-deliver party toast — structured, roast-level matched, quoting the actual stories, with the quiz results woven in if you've played. Fully editable, obviously. <strong>£50 one-off</strong>, and it includes the Full Grilling.</p>
+            <button type="button" class="btn btn-primary" id="speech-buy-btn">Get Roast &amp; Toast — £50 🥂</button>
+            <button type="button" class="btn btn-ghost hidden" id="speech-dev-unlock-btn">Unlock Roast &amp; Toast (dev mode — payments off)</button>
+          </div>
+          <div id="speech-unlocked-zone" class="hidden">
+            <p class="muted small">Your speech, built from the submissions (and the quiz results, once you've played). Rebuild any time — or edit it right here and save. Read it slowly, pause for laughs.</p>
+            <div class="btn-row" style="margin-bottom: 0.8rem;">
+              <button type="button" class="btn btn-primary" id="speech-build-btn">Write my speech</button>
+              <button type="button" class="btn btn-ghost hidden" id="speech-save-btn">Save edits</button>
+              <button type="button" class="btn btn-ghost hidden" id="speech-copy-btn">Copy speech</button>
+            </div>
+            <textarea id="speech-text" class="hidden" rows="18" maxlength="20000" aria-label="Your speech" style="width: 100%; min-height: 20rem;"></textarea>
+          </div>
+        </section>
+
         <!-- Claim by email -->
         <section class="card" id="claim-card" aria-labelledby="claim-heading">
           <h2 id="claim-heading">Don't lose this quiz 🔖</h2>

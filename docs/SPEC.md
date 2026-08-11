@@ -169,6 +169,18 @@ Grilled lets a party organiser build a live quiz about the guest of honour from 
 **Edge cases:** webhook arrives before redirect (idempotent); duplicate webhook delivery (idempotent); checkout for an already-full event (409).
 **Out of scope:** refunds UI, VAT invoicing, subscriptions, coupons.
 
+### F13. Roast & Toast — the speech (£50/event)
+**Priority:** Must (v3)
+**User story:** As Olivia (or the best man), I want the quiz material turned into a ready-to-deliver party speech so that the scariest five minutes of the do writes itself.
+**Acceptance criteria:**
+- [ ] £50 one-off per event, includes everything in Full Grilling; purchasable from Free or Full
+- [ ] Template speech engine (no AI APIs): builds a structured 3–5 minute speech from the submissions — opener, one-word portraits, story beats quoting submissions verbatim, "would never" bit, catchphrase bit, toast — honouring the roast dial
+- [ ] If the game has been played, the speech weaves in results (winner, who knew them suspiciously well)
+- [ ] Speech is editable in the dashboard, savable, copyable; regenerating never destroys a saved edit without warning
+- [ ] Degrades gracefully with few submissions; works even before the game is played (game callbacks simply absent)
+**Edge cases:** hostile submission text (stays inert text everywhere); enormous edits (length cap).
+**Out of scope:** AI prose, PDF export, teleprompter mode.
+
 ### F11. Marketing pages
 **Priority:** Should (v2)
 **User story:** As a visitor from the group chat, I want to get the joke in one screen so that I trust it with the biggest night of the year.

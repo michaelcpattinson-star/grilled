@@ -5,6 +5,7 @@ const { db, randomKey, newGameCode } = require('../db');
 const { PROMPTS } = require('../engine/prompts');
 const { generateQuiz } = require('../engine/questions');
 const { getSessionUser } = require('./auth');
+const { generateSpeech } = require('../engine/speech');
 const config = require('../config');
 
 const router = express.Router();
@@ -182,6 +183,7 @@ router.get('/events/:organiserKey', (req, res) => {
     hostUrl: `/host/${event.organiserKey}`,
     plan: event.plan || 'free',
     freeQuestionLimit: config.FREE_QUESTION_LIMIT,
+    speechPricePence: config.SPEECH_PRICE_PENCE,
     paymentsEnabled: config.PAYMENTS_ENABLED,
     claimed: !!event.userId,
     claimedByYou: !!(user && event.userId === user.id),
@@ -281,6 +283,80 @@ router.patch('/questions/:id', (req, res) => {
 
   args.push(id);
   db.prepare(`UPDATE questions SET ${sets.join(', ')} WHERE id = ?`).run(...args);
+  res.json({ ok: true });
+});
+
+// --- Roast & Toast speech (plan 'speech' only) --------------------------------
+const MAX_SPEECH_CHARS = 20000;
+
+// Pull winner + best-accuracy player out of the game checkpoint, if the game ran.
+function gameResultsForEvent(eventId) {
+  const row = db.prepare(`SELECT state FROM game_checkpoints WHERE eventId = ?`).get(eventId);
+  if (!row) return null;
+  let state;
+  try {
+    state = JSON.parse(row.state);
+  } catch {
+    return null;
+  }
+  const players = state.players || [];
+  if (!players.length) return null;
+  const winner = players.reduce((a, b) => (b.score > a.score ? b : a));
+  if (!winner.score) return null; // game never really happened
+  const knowers = players.filter((p) => p.stats && p.stats.answered > 0);
+  let knowsBest = null;
+  if (knowers.length) {
+    const best = knowers.reduce((a, b) =>
+      b.stats.correct / b.stats.answered > a.stats.correct / a.stats.answered ? b : a
+    );
+    knowsBest = { nickname: best.nickname, correct: best.stats.correct, answered: best.stats.answered };
+  }
+  return { winner: { nickname: winner.nickname, score: winner.score }, knowsBest };
+}
+
+router.get('/events/:organiserKey/speech', (req, res) => {
+  const event = getEventByOrganiserKey(req.params.organiserKey);
+  if (!event) return res.status(404).json({ error: 'Event not found.' });
+  res.json({
+    unlocked: event.plan === 'speech',
+    speech: event.plan === 'speech' ? event.speechText || null : null,
+  });
+});
+
+router.post('/events/:organiserKey/speech/build', (req, res) => {
+  const event = getEventByOrganiserKey(req.params.organiserKey);
+  if (!event) return res.status(404).json({ error: 'Event not found.' });
+  if (event.plan !== 'speech') {
+    return res.status(403).json({ error: 'The speech needs the Roast & Toast plan.' });
+  }
+  const submissions = db
+    .prepare(`SELECT promptKey, text FROM submissions WHERE eventId = ? ORDER BY id`)
+    .all(event.id);
+  const speech = generateSpeech({
+    submissions,
+    tone: event.tone,
+    guestName: event.name,
+    occasion: event.occasion,
+    gameResults: gameResultsForEvent(event.id),
+  });
+  db.prepare(`UPDATE events SET speechText = ? WHERE id = ?`).run(speech.fullText, event.id);
+  res.json({ speech: speech.fullText, wordCount: speech.wordCount });
+});
+
+router.patch('/events/:organiserKey/speech', (req, res) => {
+  const event = getEventByOrganiserKey(req.params.organiserKey);
+  if (!event) return res.status(404).json({ error: 'Event not found.' });
+  if (event.plan !== 'speech') {
+    return res.status(403).json({ error: 'The speech needs the Roast & Toast plan.' });
+  }
+  const text = (req.body || {}).text;
+  if (typeof text !== 'string' || !text.trim()) {
+    return res.status(400).json({ error: 'The speech needs some words.' });
+  }
+  if (text.length > MAX_SPEECH_CHARS) {
+    return res.status(400).json({ error: `Speeches cap out at ${MAX_SPEECH_CHARS} characters — nobody wants a two-hour toast.` });
+  }
+  db.prepare(`UPDATE events SET speechText = ? WHERE id = ?`).run(text, event.id);
   res.json({ ok: true });
 });
 

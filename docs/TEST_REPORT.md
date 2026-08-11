@@ -126,6 +126,9 @@ Scripted the real browser journeys against the live server (`/tmp/e2e.js`). Scre
 - Magic links in dev go to the server console (by design, `MAIL_MODE=console`).
 - Render free tier has no persistent disk — DEPLOY.md warns and the blueprint defaults to starter.
 
+## v3 QA — Roast & Toast (2026-08-11)
+**Verdict: PASS.** Suite now **65/65** (6 new in `test/speech.test.js`). Engine: deterministic with seeded rng, tones differ, invalid tone falls back, stories/words/nevers/catchphrase quoted verbatim, XSS text passes through inert, zero-submission safety net, game results (winner + accuracy) woven in. API: speech endpoints 403 on free AND full plans; £50 checkout carries tier metadata; webhook upgrades full→speech; a stray 'full' webhook can never downgrade a 'speech' event; edit/save with 20k cap; bad tier → 400. Visual: dashboard speech card verified in-browser (locked pitch → dev-unlock → generate → editable textarea).
+
 ## QA Log
 - 2026-08-10 — Read SPEC/ARCHITECTURE/VISION/CONTRACTS; reviewed all server + public source.
 - 2026-08-10 — Confirmed baseline 36/36 existing tests pass.

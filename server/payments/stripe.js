@@ -38,14 +38,15 @@ async function stripeRequest(method, path, params) {
 }
 
 /** Create a one-off GBP Checkout Session for an event. → {id, url} */
-function createCheckoutSession({ eventName, organiserKey }) {
+function createCheckoutSession({ eventName, organiserKey, tier = 'full', pricePence, productLabel }) {
   return stripeRequest('POST', '/v1/checkout/sessions', {
     mode: 'payment',
     'line_items[0][price_data][currency]': 'gbp',
-    'line_items[0][price_data][unit_amount]': String(config.FULL_PRICE_PENCE),
-    'line_items[0][price_data][product_data][name]': `Full Grilling — quiz about ${eventName}`,
+    'line_items[0][price_data][unit_amount]': String(pricePence || config.FULL_PRICE_PENCE),
+    'line_items[0][price_data][product_data][name]': productLabel || `Full Grilling — quiz about ${eventName}`,
     'line_items[0][quantity]': '1',
     'metadata[organiserKey]': organiserKey,
+    'metadata[tier]': tier,
     success_url: `${config.BASE_URL}/o/${organiserKey}?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${config.BASE_URL}/o/${organiserKey}`,
   });

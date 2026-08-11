@@ -1,8 +1,8 @@
 # Project Tasks — Grilled
 
 ## Status Summary
-- **Total tasks:** 28
-- **Completed:** 28
+- **Total tasks:** 31
+- **Completed:** 31
 - **In progress:** 0
 - **Blocked:** 0
 - **Remaining effort:** 0 — all phases complete
@@ -70,6 +70,11 @@
 - [x] T28. Full test-and-fix pass: whole suite + boot + E2E walkthrough (create → submit incl. XSS payload → build → moderate → ready → host + 2 players → podium) + TEST_REPORT v2 `[effort: M]` `[feature: QA]`
   - Depends on: T26, T27
 
+## Phase 6: Roast & Toast (v3)
+- [x] T29. engine/speech.js: template speech generator (tone variants, verbatim quotes, game-results callback, sparse safety net) `[effort: M]` `[feature: F13]`
+- [x] T30. Tier plumbing: plan 'speech' (£50, upgrade-only markPaid), checkout/webhook/dev-unlock tier param, speech REST endpoints, free-cap treats speech as paid `[effort: M]` `[feature: F13]`
+- [x] T31. Frontend (dashboard speech card: buy/build/edit/save/copy) + pricing page tier + 6 new tests `[effort: M]` `[feature: F13,QA]`
+
 ## Blocked / Needs Decision
 (none — hosting decision deferred by design; app is host-agnostic)
 
@@ -79,3 +84,4 @@
 ## PM Log
 - 2026-08-10 — Initial breakdown from SPEC v1 + ARCHITECTURE v1. Two L tasks (T6, T8) pre-split internally. Critical path: T1→T2→T5/T6→T7→T8→T9→T13/T14→T17. Frontend pages T10/T12 parallelisable early.
 - 2026-08-10 (v2) — Phase 4/5 breakdown added (T19–T28) and completed same day: accounts, payments, marketing, deploy docs, v2 test suite (12 new tests), full E2E walkthrough.
+- 2026-08-11 (v3) — Roast & Toast speech tier (T29–T31) built and shipped. Suite: 65/65.

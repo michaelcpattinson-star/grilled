@@ -78,6 +78,14 @@ GET /api/events/:organiserKey gains additive fields: `plan` ('free'|'full'), `fr
 - POST /api/stripe/webhook (raw body; Stripe-Signature verified, 5-min tolerance) → {received:true} | 400 bad signature
 Session cookie: `grilled_session`, httpOnly, SameSite=Lax, 90 days. Magic tokens single-use, 15-min expiry.
 Free plan: game plays first FREE_QUESTION_LIMIT (15) approved questions, superlatives []. Demo events are plan 'full'.
+
+## v3 — Roast & Toast speech tier (files: server/engine/speech.js + tier plumbing in billing/api)
+Plans: 'free' < 'full' (£19) < 'speech' (£50, includes full). markPaid is upgrade-only; webhooks can never downgrade.
+- checkout/dev-unlock accept {tier:'full'|'speech'} (default 'full'); Stripe metadata carries tier; event payload adds speechPricePence
+- generateSpeech({submissions, tone, guestName, occasion, gameResults, rng}) → {title, fullText, wordCount} — pure, deterministic with seeded rng, quotes submissions verbatim, weaves in game checkpoint results (winner + best accuracy), safety-net paragraph when material is sparse
+- GET  /api/events/:organiserKey/speech → {unlocked, speech|null}
+- POST /api/events/:organiserKey/speech/build → {speech, wordCount} (403 unless plan='speech'; overwrites stored speech — client confirms first)
+- PATCH /api/events/:organiserKey/speech {text ≤20000} → {ok:true}
 Mailer: sendMail({to,subject,text}); transports 'console' (dev default) | 'resend'; test hook setTransportForTests(fn).
 
 ## Frontend (owned by frontend, files: public/*)
