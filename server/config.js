@@ -27,6 +27,12 @@ const config = {
   // Auth lifetimes
   MAGIC_TOKEN_MINUTES: 15,
   SESSION_DAYS: 90,
+
+  // AI — off by default; the whole app runs (template engines) with it off.
+  AI_ENABLED: process.env.AI_ENABLED === 'true',
+  ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
+  AI_MODEL: process.env.AI_MODEL || 'claude-opus-5',
+  AI_CALL_CAP: Number(process.env.AI_CALL_CAP) || 40, // per event, cost guard
 };
 
 module.exports = config;

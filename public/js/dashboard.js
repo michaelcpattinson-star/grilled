@@ -135,6 +135,7 @@
 
     renderPlan();
     renderClaim();
+    renderAssistant();
 
     // Locked vs collecting layout (plan + claim cards stay in both states)
     if (isLocked()) {
@@ -186,6 +187,11 @@
       $('#dev-unlock-btn').classList.toggle('hidden', !!event.paymentsEnabled);
     }
     renderSpeech();
+  }
+
+  function renderAssistant() {
+    var paid = event.plan === 'full' || event.plan === 'speech';
+    $('#assistant-card').classList.toggle('hidden', !(event.aiEnabled && paid));
   }
 
   var speechLoaded = false;
@@ -509,7 +515,10 @@
       G.api('/api/events/' + encodeURIComponent(organiserKey) + '/speech/build', { method: 'POST' })
         .then(function (data) {
           btn.disabled = false;
-          showSpeechText(data.speech, true);
+          showSpeechText(data.speech, false);
+          G.toast(data.source === 'ai'
+            ? 'Bespoke speech, freshly written 🥂 Read it out loud once before the night.'
+            : 'Speech served. Read it out loud once before the night 🥂');
         })
         .catch(function (err) {
           btn.disabled = false;
@@ -539,6 +548,51 @@
     });
 
     G.wireCopy($('#speech-copy-btn'), function () { return $('#speech-text').value; });
+
+    // AI assistant chat (history lives in this page's memory only)
+    var assistantHistory = [];
+    function assistantBubble(role, text) {
+      var log = $('#assistant-log');
+      log.appendChild(el('div', { class: 'chat-bubble chat-' + role, text: text }));
+      log.scrollTop = log.scrollHeight;
+    }
+    function sendToAssistant() {
+      var input = $('#assistant-input');
+      var text = input.value.trim();
+      if (!text) return;
+      var btn = $('#assistant-send-btn');
+      input.value = '';
+      assistantBubble('user', text);
+      btn.disabled = true;
+      input.disabled = true;
+      G.api('/api/events/' + encodeURIComponent(organiserKey) + '/assistant', {
+        method: 'POST',
+        body: { message: text, history: assistantHistory }
+      })
+        .then(function (data) {
+          assistantBubble('assistant', data.reply);
+          assistantHistory.push({ role: 'user', content: text });
+          assistantHistory.push({ role: 'assistant', content: data.reply });
+          if (assistantHistory.length > 20) assistantHistory = assistantHistory.slice(-20);
+          if (data.actionsTaken && data.actionsTaken.length) {
+            // The assistant changed things — refresh the moderation list + counts
+            fetchQuestions().catch(function () {});
+            refreshEventSoon();
+          }
+        })
+        .catch(function (err) {
+          assistantBubble('assistant', 'Ouch — ' + err.message);
+        })
+        .then(function () {
+          btn.disabled = false;
+          input.disabled = false;
+          input.focus();
+        });
+    }
+    $('#assistant-send-btn').addEventListener('click', sendToAssistant);
+    $('#assistant-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); sendToAssistant(); }
+    });
 
     // Claim by email
     $('#claim-btn').addEventListener('click', function () {

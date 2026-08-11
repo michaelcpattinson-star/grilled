@@ -129,6 +129,9 @@ Scripted the real browser journeys against the live server (`/tmp/e2e.js`). Scre
 ## v3 QA — Roast & Toast (2026-08-11)
 **Verdict: PASS.** Suite now **65/65** (6 new in `test/speech.test.js`). Engine: deterministic with seeded rng, tones differ, invalid tone falls back, stories/words/nevers/catchphrase quoted verbatim, XSS text passes through inert, zero-submission safety net, game results (winner + accuracy) woven in. API: speech endpoints 403 on free AND full plans; £50 checkout carries tier metadata; webhook upgrades full→speech; a stray 'full' webhook can never downgrade a 'speech' event; edit/save with 20k cap; bad tier → 400. Visual: dashboard speech card verified in-browser (locked pitch → dev-unlock → generate → editable textarea).
 
+## v4 QA — AI layer (2026-08-11)
+**Verdict: PASS.** Suite now **72/72** (8 new in `test/ai.test.js`, all offline via an injected fake client). AI off (default): speech builds from templates (`source:'template'`), assistant 503s, event payload says `aiEnabled:false` — full regression green, so the £0 promise holds. AI on: speech comes from the model with the submissions and roast level verifiably in the brief, is stored and editable; model refusal, thrown errors, and a spent per-event budget all fall back to the template with a 200. Decoy punch-up applies only schema-valid payloads (exactly 3 decoys, unknown ids skipped, real fact keeps its index, edited/approved rows untouched). Assistant: free plan 403s even with AI on; scripted tool loop bins a real question, rejects an out-of-event id without acting, returns actionsTaken; message/history validation enforced; budget exhaustion ends the loop gracefully with no actions.
+
 ## QA Log
 - 2026-08-10 — Read SPEC/ARCHITECTURE/VISION/CONTRACTS; reviewed all server + public source.
 - 2026-08-10 — Confirmed baseline 36/36 existing tests pass.

@@ -21,6 +21,7 @@ Try it instantly: open the site and hit **Try the demo** — a pre-seeded event 
 - **Organisers** get a dashboard at a secret capability URL — that link is the auth. Optionally they **claim the event by email** (magic link, no passwords) and can find all their events at `/account`.
 - **Submitters and players** never sign in. Ever.
 - **Pricing:** every event starts free (plays the first 15 approved questions, no superlatives). The **Full Grilling** — £19 one-off per event via Stripe Checkout — unlocks unlimited questions and the superlatives finale. The whole app runs with payments off (`PAYMENTS_ENABLED=false`, the default); a labelled dev-unlock button stands in for checkout locally.
+- **AI (optional):** with `AI_ENABLED=true` + an Anthropic API key, the Roast & Toast speech is written bespoke by Claude (template engine remains the fallback), quiz lies get tailored to the guest, and paid organisers get a dashboard assistant ("bin anything about the ex"). With AI off — the default — everything runs on the pure template engines at £0.
 - **Trust:** submissions are anonymous by design (identity is never captured), and every event self-destructs 30 days after creation.
 
 ## Deploy

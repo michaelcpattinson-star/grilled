@@ -7,6 +7,10 @@ const { generateQuiz } = require('../engine/questions');
 const { getSessionUser } = require('./auth');
 const { generateSpeech } = require('../engine/speech');
 const config = require('../config');
+const { aiAvailable } = require('../ai/claude');
+const { writeSpeech } = require('../ai/speechWriter');
+const { punchUpDecoys } = require('../ai/decoyWriter');
+const { runAssistant } = require('../ai/assistant');
 
 const router = express.Router();
 
@@ -185,13 +189,14 @@ router.get('/events/:organiserKey', (req, res) => {
     freeQuestionLimit: config.FREE_QUESTION_LIMIT,
     speechPricePence: config.SPEECH_PRICE_PENCE,
     paymentsEnabled: config.PAYMENTS_ENABLED,
+    aiEnabled: aiAvailable(),
     claimed: !!event.userId,
     claimedByYou: !!(user && event.userId === user.id),
   });
 });
 
 // --- POST /api/events/:organiserKey/build ------------------------------------
-router.post('/events/:organiserKey/build', (req, res) => {
+router.post('/events/:organiserKey/build', async (req, res) => {
   const event = getEventByOrganiserKey(req.params.organiserKey);
   if (!event) return res.status(404).json({ error: 'Event not found.' });
   if (event.status === 'locked') return res.status(409).json({ error: 'Quiz is locked — it cannot be rebuilt.' });
@@ -206,7 +211,16 @@ router.post('/events/:organiserKey/build', (req, res) => {
   }
 
   const questionCount = runBuild(event, toneOverride);
-  res.json({ built: true, questionCount });
+
+  // Paid events with AI on: punch up the "Two Truths" decoys so the lies
+  // sound tailored to the guest. Best-effort — template decoys stay on failure.
+  let aiDecoys = 0;
+  if ((event.plan === 'full' || event.plan === 'speech') && aiAvailable()) {
+    const fresh = db.prepare(`SELECT * FROM events WHERE id = ?`).get(event.id);
+    aiDecoys = await punchUpDecoys(fresh);
+  }
+
+  res.json({ built: true, questionCount, aiDecoys });
 });
 
 // --- GET /api/events/:organiserKey/questions ----------------------------------
@@ -323,7 +337,7 @@ router.get('/events/:organiserKey/speech', (req, res) => {
   });
 });
 
-router.post('/events/:organiserKey/speech/build', (req, res) => {
+router.post('/events/:organiserKey/speech/build', async (req, res) => {
   const event = getEventByOrganiserKey(req.params.organiserKey);
   if (!event) return res.status(404).json({ error: 'Event not found.' });
   if (event.plan !== 'speech') {
@@ -332,15 +346,64 @@ router.post('/events/:organiserKey/speech/build', (req, res) => {
   const submissions = db
     .prepare(`SELECT promptKey, text FROM submissions WHERE eventId = ? ORDER BY id`)
     .all(event.id);
-  const speech = generateSpeech({
+  const gameResults = gameResultsForEvent(event.id);
+
+  // AI first (bespoke prose), template as the always-working fallback.
+  const aiText = await writeSpeech({
     submissions,
     tone: event.tone,
     guestName: event.name,
     occasion: event.occasion,
-    gameResults: gameResultsForEvent(event.id),
+    gameResults,
+    eventId: event.id,
   });
-  db.prepare(`UPDATE events SET speechText = ? WHERE id = ?`).run(speech.fullText, event.id);
-  res.json({ speech: speech.fullText, wordCount: speech.wordCount });
+  const fullText = aiText || generateSpeech({
+    submissions,
+    tone: event.tone,
+    guestName: event.name,
+    occasion: event.occasion,
+    gameResults,
+  }).fullText;
+
+  db.prepare(`UPDATE events SET speechText = ? WHERE id = ?`).run(fullText, event.id);
+  res.json({
+    speech: fullText,
+    wordCount: fullText.split(/\s+/).filter(Boolean).length,
+    source: aiText ? 'ai' : 'template',
+  });
+});
+
+// --- POST /api/events/:organiserKey/assistant ---------------------------------
+// The organiser assistant (paid plans, AI on). Chat history lives client-side.
+router.post('/events/:organiserKey/assistant', async (req, res) => {
+  const event = getEventByOrganiserKey(req.params.organiserKey);
+  if (!event) return res.status(404).json({ error: 'Event not found.' });
+  if (!aiAvailable()) {
+    return res.status(503).json({ error: 'The assistant is not switched on for this server.' });
+  }
+  if (event.plan !== 'full' && event.plan !== 'speech') {
+    return res.status(403).json({ error: 'The assistant comes with the Full Grilling.' });
+  }
+
+  const body = req.body || {};
+  const message = typeof body.message === 'string' ? body.message.trim() : '';
+  if (!message) return res.status(400).json({ error: 'Say something first.' });
+  if (message.length > 1000) return res.status(400).json({ error: 'Keep it under 1000 characters.' });
+
+  let history = Array.isArray(body.history) ? body.history.slice(-20) : [];
+  history = history.filter(
+    (h) =>
+      h && (h.role === 'user' || h.role === 'assistant') &&
+      typeof h.content === 'string' && h.content.length > 0 && h.content.length <= 4000
+  );
+
+  try {
+    const result = await runAssistant({ event, message, history });
+    res.json(result);
+  } catch (e) {
+    console.error('assistant failed:', e.message);
+    res.status(502).json({ error: 'The assistant tripped over the grill — try again in a moment.' });
+  }
 });
 
 router.patch('/events/:organiserKey/speech', (req, res) => {

@@ -88,6 +88,14 @@ Plans: 'free' < 'full' (£19) < 'speech' (£50, includes full). markPaid is upgr
 - PATCH /api/events/:organiserKey/speech {text ≤20000} → {ok:true}
 Mailer: sendMail({to,subject,text}); transports 'console' (dev default) | 'resend'; test hook setTransportForTests(fn).
 
+## v4 — AI layer (files: server/ai/claude.js, speechWriter.js, decoyWriter.js, assistant.js)
+Config: AI_ENABLED (default false), ANTHROPIC_API_KEY, AI_MODEL (claude-opus-5), AI_CALL_CAP (40/event via events.aiCalls). With AI off the template engines serve everything — no behaviour change.
+- Event payload gains `aiEnabled`. Speech build response gains `source: 'ai'|'template'`; build response gains `aiDecoys`.
+- Speech: plan 'speech' + AI on → bespoke AI speech (submissions quoted, tone-matched, quiz-results callback); template fallback on refusal/error/budget.
+- Decoy punch-up: paid plans + AI on → at build time, pending unedited twoTruths decoys rewritten via structured outputs; correct option keeps its index; strict validation; best-effort.
+- POST /api/events/:organiserKey/assistant {message ≤1000, history ≤20×4000} → {reply, actionsTaken:[{tool,summary}]} (503 AI off; 403 free plan). Tool-use loop (≤6 iterations), tools scoped to event.id: list_questions, set_question_status, edit_question, get_event_summary — all reversible, nothing reaches the host screen unapproved.
+- Adapter test hook: setClientForTests(fakeClient). API key server-side only; submissions treated as data (prompt-injection guard in every system prompt).
+
 ## Frontend (owned by frontend, files: public/*)
 Pages: index.html (landing: Create → /new, Join → /play, Try the demo → POST /api/demo then redirect /o/{key}), new.html, dashboard.html, submit.html, host.html, play.html, 404.html, css/grilled.css, js one file per page + js/shared.js.
 Path parsing: dashboard/host/submit read their key from location.pathname (/o/KEY, /host/KEY, /s/KEY). Socket.IO client from '/socket.io/socket.io.js'.

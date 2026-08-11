@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS sessions (
   if (!cols.has('stripeSessionId')) db.exec(`ALTER TABLE events ADD COLUMN stripeSessionId TEXT`);
   if (!cols.has('userId')) db.exec(`ALTER TABLE events ADD COLUMN userId INTEGER REFERENCES users(id)`);
   if (!cols.has('speechText')) db.exec(`ALTER TABLE events ADD COLUMN speechText TEXT`);
+  if (!cols.has('aiCalls')) db.exec(`ALTER TABLE events ADD COLUMN aiCalls INTEGER NOT NULL DEFAULT 0`);
 }
 
 // Retention sweeps on boot: events after 30 days (the trust feature),

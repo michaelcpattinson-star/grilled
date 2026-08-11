@@ -1,8 +1,8 @@
 # Project Tasks — Grilled
 
 ## Status Summary
-- **Total tasks:** 31
-- **Completed:** 31
+- **Total tasks:** 35
+- **Completed:** 35
 - **In progress:** 0
 - **Blocked:** 0
 - **Remaining effort:** 0 — all phases complete
@@ -75,6 +75,12 @@
 - [x] T30. Tier plumbing: plan 'speech' (£50, upgrade-only markPaid), checkout/webhook/dev-unlock tier param, speech REST endpoints, free-cap treats speech as paid `[effort: M]` `[feature: F13]`
 - [x] T31. Frontend (dashboard speech card: buy/build/edit/save/copy) + pricing page tier + 6 new tests `[effort: M]` `[feature: F13,QA]`
 
+## Phase 7: AI layer (v4)
+- [x] T32. server/ai/claude.js adapter: official SDK, AI_ENABLED flag, per-event budget (aiCalls cap), test-injectable client `[effort: S]` `[feature: AI]`
+- [x] T33. AI speech writer (Roast & Toast): bespoke prose with template fallback on refusal/error/budget; source flag in response `[effort: M]` `[feature: F13,AI]`
+- [x] T34. Decoy punch-up: structured-outputs rewrite of twoTruths lies at build time, validation-gated, best-effort `[effort: M]` `[feature: F3,AI]`
+- [x] T35. Organiser assistant: tool-use agent (moderation tools scoped to event), dashboard chat UI, landing-page Roast & Toast section, 8 new tests `[effort: L→split: agent/UI]` `[feature: F4,AI]`
+
 ## Blocked / Needs Decision
 (none — hosting decision deferred by design; app is host-agnostic)
 
@@ -85,3 +91,4 @@
 - 2026-08-10 — Initial breakdown from SPEC v1 + ARCHITECTURE v1. Two L tasks (T6, T8) pre-split internally. Critical path: T1→T2→T5/T6→T7→T8→T9→T13/T14→T17. Frontend pages T10/T12 parallelisable early.
 - 2026-08-10 (v2) — Phase 4/5 breakdown added (T19–T28) and completed same day: accounts, payments, marketing, deploy docs, v2 test suite (12 new tests), full E2E walkthrough.
 - 2026-08-11 (v3) — Roast & Toast speech tier (T29–T31) built and shipped. Suite: 65/65.
+- 2026-08-11 (v4) — AI layer (T32–T35) shipped behind AI_ENABLED. Suite: 72/72.

@@ -95,6 +95,17 @@
           </div>
         </section>
 
+        <!-- AI assistant (paid plans, AI-enabled servers only) -->
+        <section class="card hidden" id="assistant-card" aria-labelledby="assistant-heading">
+          <h2 id="assistant-heading">Quiz assistant 🤖</h2>
+          <p class="muted small">Tell it what you want in plain English — "approve everything about the stag do", "bin anything that mentions work", "make round 2 nan-safe". It moderates; you stay in charge (everything's reversible).</p>
+          <div id="assistant-log" aria-live="polite"></div>
+          <div class="copy-line">
+            <input type="text" id="assistant-input" placeholder="e.g. bin anything too spicy for his mum" maxlength="1000" aria-label="Ask the assistant">
+            <button type="button" class="btn btn-primary" id="assistant-send-btn">Send</button>
+          </div>
+        </section>
+
         <!-- Roast & Toast speech -->
         <section class="card" id="speech-card" aria-labelledby="speech-heading">
           <h2 id="speech-heading">The speech 🥂 <span class="plan-badge plan-free" id="speech-badge">Roast &amp; Toast</span></h2>

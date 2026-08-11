@@ -29,6 +29,9 @@ host (Fly.io, Railway, a VPS…).
 | `STRIPE_WEBHOOK_SECRET` | if payments on | From the webhook endpoint you create (below), `whsec_…`. |
 | `FULL_PRICE_PENCE` | no (default `1900`) | Price of the Full Grilling in pence. |
 | `FREE_QUESTION_LIMIT` | no (default `15`) | How many approved questions a free event plays. |
+| `AI_ENABLED` | no (default `false`) | Master switch for the AI layer (bespoke speeches, tailored quiz lies, the organiser assistant). Off = template engines, £0 to run. |
+| `ANTHROPIC_API_KEY` | if AI on | From console.anthropic.com. Costs are tiny (a speech ≈ 5p) and capped per event via `AI_CALL_CAP` (default 40 calls). |
+| `AI_MODEL` | no (default `claude-opus-5`) | Which Claude model to use. |
 | `MAIL_MODE` | no (default `console`) | `console` logs emails to the server log; `resend` sends real email via Resend. |
 | `RESEND_API_KEY` | if `MAIL_MODE=resend` | From resend.com (free tier is plenty to start). |
 | `MAIL_FROM` | if sending real mail | e.g. `Grilled <hello@yourdomain.com>` — must be a verified sender/domain in Resend. |

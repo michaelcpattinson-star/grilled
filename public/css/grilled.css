@@ -1043,3 +1043,34 @@ body.play-body { display: flex; flex-direction: column; min-height: 100vh; }
   border: 1px solid var(--muted);
   color: var(--muted);
 }
+
+/* ---------- v4: AI assistant chat ---------- */
+#assistant-log {
+  max-height: 20rem;
+  overflow-y: auto;
+  margin-bottom: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+#assistant-log:empty { display: none; }
+.chat-bubble {
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.9rem;
+  max-width: 85%;
+  font-size: 0.95rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.chat-user {
+  align-self: flex-end;
+  background: var(--flame);
+  color: var(--ink, #1a1310);
+  border-bottom-right-radius: 0.25rem;
+}
+.chat-assistant {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom-left-radius: 0.25rem;
+}
