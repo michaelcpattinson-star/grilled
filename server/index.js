@@ -24,6 +24,8 @@ const page = (file) => (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', file));
 app.get('/pricing', page('pricing.html'));
 app.get('/how-it-works', page('how.html'));
+app.get('/privacy', page('privacy.html'));
+app.get('/terms', page('terms.html'));
 app.get('/account', page('account.html'));
 app.get('/auth/verify', auth.verifyHandler);
 app.get('/new', page('new.html'));
