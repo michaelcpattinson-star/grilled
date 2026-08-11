@@ -91,20 +91,24 @@ function cleanNeverCompletion(text, guestName) {
 }
 
 // Trim a story down to a one-breath quizmaster summary for use as an option.
+// Budget sits well under the 200-char option cap: a mid-clause chop can amputate
+// the punchline ("…speaking only in" losing "pirate"), so prefer whole sentences
+// and only cut at a word boundary as a last resort.
+const STORY_SUMMARY_CHARS = 180;
 function summariseStory(text) {
   const s = cleanOption(text);
-  if (s.length <= 120) return s;
+  if (s.length <= STORY_SUMMARY_CHARS) return s;
   // Prefer whole sentences.
   const sentences = collapse(text).split(/(?<=[.!?])\s+/);
   let out = '';
   for (const sentence of sentences) {
     const next = out ? `${out} ${sentence}` : sentence;
-    if (next.length > 120) break;
+    if (next.length > STORY_SUMMARY_CHARS) break;
     out = next;
   }
   if (out.length >= 40) return cleanOption(out);
   // First sentence alone is huge — cut at a word boundary.
-  const cut = s.slice(0, 117);
+  const cut = s.slice(0, STORY_SUMMARY_CHARS - 3);
   return `${cut.slice(0, cut.lastIndexOf(' '))}…`;
 }
 
@@ -430,13 +434,31 @@ function generateQuiz({ submissions = [], tone = 'medium', guestName = 'the gues
   const stories = capped.filter(i => i.question.format === 'whoseStory');
   const liedetector = capped.filter(i => i.question.format === 'twoTruths');
 
+  // Keep questions that grew from the same submission apart: when material is
+  // sparse, secondary framings share an answer with their primary, and two
+  // same-answer questions back-to-back read as a bug to players.
+  const separateBySource = (questions) => {
+    const shares = (a, b) => {
+      const ids = new Set(a.sourceSubmissionIds || []);
+      return (b.sourceSubmissionIds || []).some(id => ids.has(id));
+    };
+    const out = questions.slice();
+    for (let i = 1; i < out.length; i++) {
+      if (!shares(out[i - 1], out[i])) continue;
+      let j = i + 1;
+      while (j < out.length && shares(out[i - 1], out[j])) j++;
+      if (j < out.length) [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
+  };
+
   const rounds = [];
   const pushRound = (roundKey, items) => {
     if (items.length === 0) return;
     rounds.push({
       roundKey,
       title: ROUND_TITLES[roundKey][tone](name),
-      questions: shuffle(items.map(i => i.question), rng),
+      questions: separateBySource(shuffle(items.map(i => i.question), rng)),
     });
   };
   pushRound('warmup', warmup);

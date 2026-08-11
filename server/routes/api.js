@@ -493,24 +493,58 @@ router.post('/submit/:submissionKey', (req, res) => {
 });
 
 // --- POST /api/demo -----------------------------------------------------------
+// The demo is the shop window: enough material that the engine builds ~20
+// questions from PRIMARY framings only (secondary framings reuse answers and
+// read as duplication), plus a hand-written Roast & Toast speech so visitors
+// see the full product at its best.
 const DEMO_SUBMISSIONS = [
   { promptKey: 'story', text: "Gary got his tie caught in the office paper shredder mid-Zoom call and had to cut himself free with nail scissors while forty colleagues watched in silence. He kept saying 'as per my last email' the whole time." },
-  { promptKey: 'story', text: "On a stag do in Blackpool, Gary lost a bet and had to order every round for the rest of the night speaking only in pirate. By midnight the barman was adding a 'doubloon surcharge' and Gary paid it without breaking character." },
+  { promptKey: 'story', text: "On the stag do in Blackpool, Gary lost a bet and had to order every round for the rest of the night speaking only in pirate. By midnight the barman was adding a 'doubloon surcharge' and Gary paid it without breaking character." },
+  { promptKey: 'story', text: "Gary once missed a boarding call because he'd gone back through security to buy a Toblerone. He only made the flight because it was delayed, and he still describes this as 'good instincts'." },
+  { promptKey: 'story', text: "At a food festival Gary queued forty minutes for what he thought was free cheese. It was a raffle. He panicked, bought thirty tickets, and won a barbecue smoker he is now visibly afraid of." },
   { promptKey: 'fact', text: "Gary keeps a spreadsheet ranking every motorway service station he has ever visited. Tebay is top, Watford Gap is bottom, and he will defend the methodology with his life." },
   { promptKey: 'fact', text: "He has cried at the John Lewis Christmas advert three years running and blamed hay fever. In December." },
+  { promptKey: 'fact', text: "He has a 200-day Duolingo streak in Welsh. He has never been to Wales and has no plans to go." },
+  { promptKey: 'fact', text: "He calls his slow cooker 'the workhorse' and was once overheard describing it as 'the only one who really listens'." },
+  { promptKey: 'fact', text: "He won the pub quiz single-handed in 2019 and has brought it up, on average, once a fortnight since." },
+  { promptKey: 'fact', text: "He owns a 'good pen'. Nobody else is allowed to use the good pen. He can tell when it has been moved." },
   { promptKey: 'word', text: 'Beige' },
   { promptKey: 'word', text: 'Chaotic' },
+  { promptKey: 'word', text: 'Thorough' },
   { promptKey: 'never', text: 'turn down a carvery, even if he has already had a carvery that day.' },
+  { promptKey: 'never', text: 'say the barbecue is anything other than "two minutes away", regardless of all available evidence.' },
+  { promptKey: 'never', text: 'walk past a dog without giving it a full match commentary.' },
   { promptKey: 'sentence', text: "I'm not being funny, but..." },
+  { promptKey: 'sentence', text: 'To be fair, it was reduced.' },
 ];
+
+// Hand-written Roast & Toast sample — the speech the demo shows off.
+const DEMO_SPEECH = `Ladies and gentlemen, for those who don't know me, I'm the best man, which in Gary's case is less an honour and more a safeguarding role.
+
+Before tonight, we did something Gary doesn't know about. We sent a secret link to everyone who loves him and asked for the truth. No names, full anonymity. I want you to bear that in mind as you listen, Gary, because every word of what follows came from the people at these tables. Your people. The ones you invited.
+
+They were asked to describe him in one word. The three answers that came back were "thorough", "chaotic" and "beige". I've known Gary twenty years and I can confirm all three are accurate, often within the same hour. This is a man who keeps a spreadsheet ranking every motorway service station he has ever visited. Tebay at the top, Watford Gap at the bottom, and a scoring methodology he will defend like it's his own child. That's the thorough part. The chaotic part is that he once missed a boarding call because he'd gone back through security for a Toblerone. He made the flight, but only because it was delayed, and to this day he calls that "good instincts".
+
+The stories came flooding in, and I want to read you one exactly as it arrived: "Gary got his tie caught in the office paper shredder mid-Zoom call and had to cut himself free with nail scissors while forty colleagues watched in silence. He kept saying 'as per my last email' the whole time." Forty witnesses. Nail scissors. And the man never once dropped his professional register. If that isn't the husband you want in a crisis, I don't know who is.
+
+Someone else reminded us about Blackpool. On the stag do, Gary lost a bet and had to order every round for the rest of the night speaking only in pirate. By midnight the barman was adding a "doubloon surcharge", and Gary paid it without breaking character. Think about what that tells you. Gary is a man of his word. Even when his word is "arrr".
+
+There's a softer side, of course. His friends tell me he has cried at the John Lewis Christmas advert three years running and blamed hay fever. In December. He has a 200-day Duolingo streak in Welsh, for a country he has never visited and has no plans to. And he calls the slow cooker "the workhorse", which was funny right up until someone heard him describe it as "the only one who really listens". Not any more, Gary. You have a wife for that now, and she has questions.
+
+We also asked what Gary would never do. On this, your friends were unanimous. He would never turn down a carvery, even if he has already had a carvery that day. He would never say the barbecue is anything other than "two minutes away", regardless of all available evidence. And he would never walk past a dog without giving it a full match commentary. If you take one thing from tonight, take that. The man you're marrying will love you the way he loves a carvery: completely, and entirely without shame.
+
+So. To the woman who has heard "I'm not being funny, but..." a thousand times and stayed anyway. To the man who panic-bought thirty raffle tickets and now owns a barbecue smoker he's frightened of. You are, without question, the best thing on his spreadsheet.
+
+Ladies and gentlemen, be upstanding, charge your glasses, and mind the good pen. To Gary!`;
 
 router.post('/demo', (req, res) => {
   const organiserKey = randomKey(12);
   const submissionKey = randomKey(8);
-  // Demo events get the full plan — the demo is the shop window.
+  // Demo events get the top plan and a pre-written speech — the shop window
+  // shows the whole product.
   const info = db
-    .prepare(`INSERT INTO events (name, occasion, tone, organiserKey, submissionKey, isDemo, plan) VALUES (?, ?, ?, ?, ?, 1, 'full')`)
-    .run('Gary', '30th birthday', 'medium', organiserKey, submissionKey);
+    .prepare(`INSERT INTO events (name, occasion, tone, organiserKey, submissionKey, isDemo, plan, speechText) VALUES (?, ?, ?, ?, ?, 1, 'speech', ?)`)
+    .run('Gary', 'wedding', 'medium', organiserKey, submissionKey, DEMO_SPEECH);
   const eventId = info.lastInsertRowid;
 
   const insert = db.prepare(`INSERT INTO submissions (eventId, promptKey, text) VALUES (?, ?, ?)`);

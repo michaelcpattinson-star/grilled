@@ -272,7 +272,7 @@ test('POST /api/demo creates a built, fully-approved, unlocked event', async () 
   const dash = await request(app).get(`/api/events/${organiserKey}`);
   assert.equal(dash.status, 200);
   assert.equal(dash.body.name, 'Gary');
-  assert.equal(dash.body.occasion, '30th birthday');
+  assert.equal(dash.body.occasion, 'wedding');
   assert.equal(dash.body.status, 'collecting', 'demo is NOT auto-locked');
   assert.ok(dash.body.submissionCount >= 8);
   assert.equal(dash.body.questionCounts.pending, 0);

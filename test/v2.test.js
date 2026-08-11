@@ -343,8 +343,12 @@ test('free plan: game plays first 15 approved questions and no superlatives; ful
   assert.ok(fullGame.buildStatePayload(null).podium.superlatives.length >= 1);
 });
 
-test('demo events are created on the full plan', async () => {
+test('demo events are created on the Roast & Toast plan with a pre-written speech', async () => {
   const res = await request(app).post('/api/demo').expect(200);
   const ev = await request(app).get(`/api/events/${res.body.organiserKey}`).expect(200);
-  assert.equal(ev.body.plan, 'full');
+  assert.equal(ev.body.plan, 'speech');
+  const sp = await request(app).get(`/api/events/${res.body.organiserKey}/speech`).expect(200);
+  assert.equal(sp.body.unlocked, true);
+  assert.match(sp.body.speech, /best man/i);
+  assert.match(sp.body.speech, /To Gary!/);
 });
