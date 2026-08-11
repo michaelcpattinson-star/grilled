@@ -136,6 +136,7 @@
     renderPlan();
     renderClaim();
     renderAssistant();
+    renderDemoGuide();
 
     // Locked vs collecting layout (plan + claim cards stay in both states)
     if (isLocked()) {
@@ -187,6 +188,12 @@
       $('#dev-unlock-btn').classList.toggle('hidden', !!event.paymentsEnabled);
     }
     renderSpeech();
+  }
+
+  function renderDemoGuide() {
+    var card = $('#demo-guide-card');
+    card.classList.toggle('hidden', !event.isDemo);
+    if (event.isDemo) $('#demo-play-host').textContent = location.host + '/play';
   }
 
   function renderAssistant() {

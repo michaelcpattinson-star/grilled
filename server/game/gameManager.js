@@ -25,6 +25,9 @@ class Game {
     this.guestName = event.name;
     this.code = event.gameCode;
     this.plan = event.plan || 'free';
+    // Demo events can be played solo — a real party needs 2+, but a demo
+    // visitor exploring on one laptop must be able to see the game.
+    this.minPlayers = event.isDemo ? 1 : 2;
     this.timerSeconds = TIMER_SECONDS;
 
     // Approved questions, grouped into rounds by first appearance in sortOrder.
@@ -112,7 +115,13 @@ class Game {
   // ---- phase machine --------------------------------------------------------
   start() {
     if (this.phase !== 'lobby') throw new Error('Game already started.');
-    if (this.connectedCount() < 2) throw new Error('Need at least 2 players to start.');
+    if (this.connectedCount() < this.minPlayers) {
+      throw new Error(
+        this.minPlayers === 1
+          ? 'Join from a phone first — then hit start.'
+          : 'Need at least 2 players to start.'
+      );
+    }
     if (!this.rounds.length) throw new Error('No approved questions to play.');
     this.next();
   }

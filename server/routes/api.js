@@ -192,6 +192,7 @@ router.get('/events/:organiserKey', (req, res) => {
     aiEnabled: aiAvailable(),
     claimed: !!event.userId,
     claimedByYou: !!(user && event.userId === user.id),
+    isDemo: !!event.isDemo,
   });
 });
 

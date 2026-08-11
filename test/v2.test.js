@@ -347,8 +347,32 @@ test('demo events are created on the Roast & Toast plan with a pre-written speec
   const res = await request(app).post('/api/demo').expect(200);
   const ev = await request(app).get(`/api/events/${res.body.organiserKey}`).expect(200);
   assert.equal(ev.body.plan, 'speech');
+  assert.equal(ev.body.isDemo, true);
   const sp = await request(app).get(`/api/events/${res.body.organiserKey}/speech`).expect(200);
   assert.equal(sp.body.unlocked, true);
   assert.match(sp.body.speech, /best man/i);
   assert.match(sp.body.speech, /To Gary!/);
+});
+
+test('demo events can be played solo; real events still need 2 players', async () => {
+  const res = await request(app).post('/api/demo').expect(200);
+  await request(app).post(`/api/events/${res.body.organiserKey}/ready`).expect(200);
+  const demoEvent = db.prepare(`SELECT id FROM events WHERE organiserKey = ?`).get(res.body.organiserKey);
+
+  const demoGame = new Game(demoEvent.id);
+  demoGame.addPlayer('Solo Sal');
+  demoGame.start(); // one player is enough in the demo
+  assert.equal(demoGame.phase, 'question');
+
+  // regression: a real (non-demo) event still refuses to start solo
+  const { organiserKey } = await createEvent('Duo Dan');
+  const real = db.prepare(`SELECT id FROM events WHERE organiserKey = ?`).get(organiserKey);
+  db.prepare(`UPDATE events SET status='locked', gameCode='DUOX' WHERE id = ?`).run(real.id);
+  db.prepare(
+    `INSERT INTO questions (eventId, roundKey, format, questionText, options, correctIndex, sourceText, fingerprint, status, sortOrder)
+     VALUES (?, 'warmup', 'howWell', 'Q?', '["A","B","C","D"]', 0, '', 'solo-fp-1', 'approved', 1)`
+  ).run(real.id);
+  const realGame = new Game(real.id);
+  realGame.addPlayer('Lonely Len');
+  assert.throws(() => realGame.start(), /at least 2 players/);
 });
