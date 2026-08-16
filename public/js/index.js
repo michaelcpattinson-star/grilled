@@ -4,7 +4,7 @@
   // "Time to grill your ______." — cycle the victim
   var target = G.$('#grill-target');
   if (target) {
-    var victims = ['bestie', 'best mate', 'bride-to-be', 'stag', 'birthday boy', 'birthday girl', 'work wife', 'old man'];
+    var victims = ['bestie', 'best mate', 'bride-to-be', 'stag', 'birthday boy', 'birthday girl', 'work wife', 'office legend', 'old man'];
     var i = 0;
     setInterval(function () {
       i = (i + 1) % victims.length;
