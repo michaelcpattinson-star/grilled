@@ -243,6 +243,20 @@ test('assistant: gated to paid plans, executes tools scoped to the event, return
     .expect(400);
 });
 
+test('demo events never spend AI tokens, even with AI on', async (t) => {
+  let aiCalls = 0;
+  withAI(t, () => { aiCalls += 1; return textResponse('should never be used'); });
+
+  const demo = await request(app).post('/api/demo').expect(200);
+  const key = demo.body.organiserKey;
+
+  const speech = await request(app).post(`/api/events/${key}/speech/build`).expect(200);
+  assert.equal(speech.body.source, 'template');
+  await request(app).post(`/api/events/${key}/build`).expect(200);
+  await request(app).post(`/api/events/${key}/assistant`).send({ message: 'hi' }).expect(403);
+  assert.equal(aiCalls, 0, 'no AI call may originate from a demo event');
+});
+
 test('assistant: budget cap ends the loop gracefully', async (t) => {
   withAI(t, () => textResponse('never reached'));
   const { organiserKey } = await createSpeechEvent('Skint');

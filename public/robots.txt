@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /o/
+Disallow: /s/
+Disallow: /host/
+Disallow: /auth/
+Disallow: /account
+
+Sitemap: https://getgrilled.co.uk/sitemap.xml

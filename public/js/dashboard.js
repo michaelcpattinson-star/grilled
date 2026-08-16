@@ -198,7 +198,7 @@
 
   function renderAssistant() {
     var paid = event.plan === 'full' || event.plan === 'speech';
-    $('#assistant-card').classList.toggle('hidden', !(event.aiEnabled && paid));
+    $('#assistant-card').classList.toggle('hidden', !(event.aiEnabled && paid && !event.isDemo));
   }
 
   var speechLoaded = false;
@@ -211,6 +211,13 @@
       $('#speech-buy-btn').classList.toggle('hidden', !event.paymentsEnabled);
       $('#speech-dev-unlock-btn').classList.toggle('hidden', !!event.paymentsEnabled);
       return;
+    }
+    // Demo: the speech is a read-only sample — rewriting is a real-plan thing.
+    if (event.isDemo) {
+      $('#speech-build-btn').classList.add('hidden');
+      $('#speech-save-btn').classList.add('hidden');
+      $('#speech-text').setAttribute('readonly', '');
+      $('#speech-demo-note').classList.remove('hidden');
     }
     if (speechLoaded) return;
     speechLoaded = true;
@@ -225,7 +232,7 @@
     var ta = $('#speech-text');
     ta.value = text;
     ta.classList.remove('hidden');
-    $('#speech-save-btn').classList.remove('hidden');
+    if (!event.isDemo) $('#speech-save-btn').classList.remove('hidden');
     $('#speech-copy-btn').classList.remove('hidden');
     $('#speech-build-btn').textContent = 'Rebuild from scratch';
     if (toastIt) G.toast('Speech served. Read it out loud once before the night 🥂');

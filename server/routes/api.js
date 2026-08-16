@@ -215,8 +215,10 @@ router.post('/events/:organiserKey/build', async (req, res) => {
 
   // Paid events with AI on: punch up the "Two Truths" decoys so the lies
   // sound tailored to the guest. Best-effort — template decoys stay on failure.
+  // Demo events are excluded: they carry the top plan for showcase purposes
+  // but must never spend AI tokens (nobody paid).
   let aiDecoys = 0;
-  if ((event.plan === 'full' || event.plan === 'speech') && aiAvailable()) {
+  if (!event.isDemo && (event.plan === 'full' || event.plan === 'speech') && aiAvailable()) {
     const fresh = db.prepare(`SELECT * FROM events WHERE id = ?`).get(event.id);
     aiDecoys = await punchUpDecoys(fresh);
   }
@@ -350,7 +352,8 @@ router.post('/events/:organiserKey/speech/build', async (req, res) => {
   const gameResults = gameResultsForEvent(event.id);
 
   // AI first (bespoke prose), template as the always-working fallback.
-  const aiText = await writeSpeech({
+  // Demos never spend tokens — their showcase speech is pre-written anyway.
+  const aiText = event.isDemo ? null : await writeSpeech({
     submissions,
     tone: event.tone,
     guestName: event.name,
@@ -384,6 +387,9 @@ router.post('/events/:organiserKey/assistant', async (req, res) => {
   }
   if (event.plan !== 'full' && event.plan !== 'speech') {
     return res.status(403).json({ error: 'The assistant comes with the Full Grilling.' });
+  }
+  if (event.isDemo) {
+    return res.status(403).json({ error: 'The assistant comes with real events — the demo moderates the old-fashioned way.' });
   }
 
   const body = req.body || {};
@@ -522,21 +528,27 @@ const DEMO_SUBMISSIONS = [
 // Hand-written Roast & Toast sample — the speech the demo shows off.
 const DEMO_SPEECH = `Ladies and gentlemen, for those who don't know me, I'm the best man, which in Gary's case is less an honour and more a safeguarding role.
 
-Before tonight, we did something Gary doesn't know about. We sent a secret link to everyone who loves him and asked for the truth. No names, full anonymity. I want you to bear that in mind as you listen, Gary, because every word of what follows came from the people at these tables. Your people. The ones you invited.
+Before anything else, some thank yous. To everyone who travelled to be here, some of you from genuinely inconvenient places: thank you, and the bar is open. To the parents on both sides, for the welcome, the wisdom, and the discreet financing. To the bridesmaids, who have been magnificent all day and deserve far better than the dance moves heading their way this evening. And to the bride, who looks absolutely stunning. Gary, you look like a man who tried extremely hard, which for you is itself a triumph, and we are all quietly moved.
 
-They were asked to describe him in one word. The three answers that came back were "thorough", "chaotic" and "beige". I've known Gary twenty years and I can confirm all three are accurate, often within the same hour. This is a man who keeps a spreadsheet ranking every motorway service station he has ever visited. Tebay at the top, Watford Gap at the bottom, and a scoring methodology he will defend like it's his own child. That's the thorough part. The chaotic part is that he once missed a boarding call because he'd gone back through security for a Toblerone. He made the flight, but only because it was delayed, and to this day he calls that "good instincts".
+Now. Before tonight, we did something Gary doesn't know about. We sent a secret link to everyone who loves him and asked for the truth. No names, full anonymity. I want you to bear that in mind as you listen, Gary, because every word of what follows came from the people at these tables. Your people. The ones you invited. The ones currently avoiding eye contact.
 
-The stories came flooding in, and I want to read you one exactly as it arrived: "Gary got his tie caught in the office paper shredder mid-Zoom call and had to cut himself free with nail scissors while forty colleagues watched in silence. He kept saying 'as per my last email' the whole time." Forty witnesses. Nail scissors. And the man never once dropped his professional register. If that isn't the husband you want in a crisis, I don't know who is.
+I met Gary at university, in a kitchen, at two in the morning, during a fire alarm. Everyone else stood shivering in the car park with a coat. Gary emerged carrying his laptop, a dressing gown he wasn't wearing, and a single raw potato he has never adequately explained. I looked at this man and thought: there is a person who will be in my life forever. I was right, and I have spent twenty years paying for it.
 
-Someone else reminded us about Blackpool. On the stag do, Gary lost a bet and had to order every round for the rest of the night speaking only in pirate. By midnight the barman was adding a "doubloon surcharge", and Gary paid it without breaking character. Think about what that tells you. Gary is a man of his word. Even when his word is "arrr".
+Your friends were asked to describe him in one word. The three answers that came back were "thorough", "chaotic" and "beige". I can confirm all three are accurate, frequently within the same hour. Thorough: this is a man who keeps a spreadsheet ranking every motorway service station he has ever visited. Tebay at the top, Watford Gap at the bottom, and a scoring methodology he defends like it's his own child. Chaotic: he once missed a boarding call because he'd gone back through security for a Toblerone. He made the flight only because it was delayed, and to this day he describes that as "good instincts". Beige speaks for itself, and so does his wardrobe.
 
-There's a softer side, of course. His friends tell me he has cried at the John Lewis Christmas advert three years running and blamed hay fever. In December. He has a 200-day Duolingo streak in Welsh, for a country he has never visited and has no plans to. And he calls the slow cooker "the workhorse", which was funny right up until someone heard him describe it as "the only one who really listens". Not any more, Gary. You have a wife for that now, and she has questions.
+The stories came flooding in, and I want to read you one exactly as it arrived: "Gary got his tie caught in the office paper shredder mid-Zoom call and had to cut himself free with nail scissors while forty colleagues watched in silence. He kept saying 'as per my last email' the whole time." Forty witnesses. Nail scissors. And the man never once dropped his professional register. If that isn't the husband you want beside you in a crisis, I don't know who is.
 
-We also asked what Gary would never do. On this, your friends were unanimous. He would never turn down a carvery, even if he has already had a carvery that day. He would never say the barbecue is anything other than "two minutes away", regardless of all available evidence. And he would never walk past a dog without giving it a full match commentary. If you take one thing from tonight, take that. The man you're marrying will love you the way he loves a carvery: completely, and entirely without shame.
+Someone else reminded us about Blackpool. On the stag do, Gary lost a bet and had to order every round for the rest of the night speaking only in pirate. By midnight the barman was adding a "doubloon surcharge", and Gary paid it without breaking character. Think about what that tells you. Gary is a man of his word. Even when his word is "arrr". And then there was the food festival, where he queued forty minutes for what he believed was free cheese, discovered it was a raffle, panicked, bought thirty tickets, and won a barbecue smoker he is now visibly afraid of. It lives in the garage. He checks on it.
 
-So. To the woman who has heard "I'm not being funny, but..." a thousand times and stayed anyway. To the man who panic-bought thirty raffle tickets and now owns a barbecue smoker he's frightened of. You are, without question, the best thing on his spreadsheet.
+There is a softer side, and his friends made sure I knew about it. He has cried at the John Lewis Christmas advert three years running and blamed hay fever. In December. He has a 200-day Duolingo streak in Welsh, for a country he has never visited and has no plans to. He won the pub quiz single-handed in 2019 and has mentioned it, on average, once a fortnight since, and honestly, fair enough. He owns a "good pen" that nobody else may touch, and he can tell when it has been moved. And he calls his slow cooker "the workhorse", which was funny right up until someone overheard him describe it as "the only one who really listens". Not any more, Gary. You have a wife for that now, and she has questions.
 
-Ladies and gentlemen, be upstanding, charge your glasses, and mind the good pen. To Gary!`;
+And then she arrived, and those of us who have known Gary longest watched something remarkable happen. The spreadsheet gained a new column for her favourite stops. Tebay kept the top spot, but the methodology suddenly had room for a second opinion, which anyone familiar with the methodology will recognise as the single largest concession of Gary's adult life. He started saying "we" without noticing. He learned to share the good pen: one person on earth has borrowing rights, and she is wearing white. Because for all the chaos, there is nobody more loyal than Gary. He is the friend who turns up. Unasked, unannounced, admittedly usually with a carvery recommendation, but he turns up. And watching him with her these past few years, we have all seen the same thing. He turns up for her like it is the only fixture on the calendar.
+
+We also asked what Gary would never do, and on this your friends were unanimous. He would never turn down a carvery, even if he has already had a carvery that day. He would never admit the barbecue is anything other than "two minutes away", regardless of all available evidence. And he would never walk past a dog without giving it a full match commentary. So to the bride: the man you have married is a simple creature, and he will love you the way he loves a carvery. Completely, and entirely without shame.
+
+Married life advice was also collected anonymously, and the best of it deserves reading out. One: "the barbecue is never two minutes away, and neither is Gary, so tell him an earlier time." Two: "she is now the good pen. Irreplaceable. Notice if she has been moved."
+
+So: please be upstanding and charge your glasses. To the woman who has heard "I'm not being funny, but..." a thousand times and married him anyway. To the man who once paid a doubloon surcharge out of sheer integrity. To the two of them, and the lifetime of stories their mates will one day submit about them both. Ladies and gentlemen: to the bride and groom!`;
 
 router.post('/demo', (req, res) => {
   const organiserKey = randomKey(12);

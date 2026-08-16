@@ -351,7 +351,7 @@ test('demo events are created on the Roast & Toast plan with a pre-written speec
   const sp = await request(app).get(`/api/events/${res.body.organiserKey}/speech`).expect(200);
   assert.equal(sp.body.unlocked, true);
   assert.match(sp.body.speech, /best man/i);
-  assert.match(sp.body.speech, /To Gary!/);
+  assert.match(sp.body.speech, /to the bride and groom!/i);
 });
 
 test('demo events can be played solo; real events still need 2 players', async () => {
