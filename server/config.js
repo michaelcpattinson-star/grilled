@@ -6,12 +6,16 @@
 
 const PORT = Number(process.env.PORT) || 3000;
 
+// Env flags arrive as strings from dashboards where "True"/"TRUE"/"1" are easy
+// to type — accept the obvious spellings rather than failing silently.
+const flag = (v) => /^\s*(true|1|yes|on)\s*$/i.test(v || '');
+
 const config = {
   PORT,
   BASE_URL: process.env.BASE_URL || `http://localhost:${PORT}`,
 
   // Payments — off by default; the whole app runs with them off.
-  PAYMENTS_ENABLED: process.env.PAYMENTS_ENABLED === 'true',
+  PAYMENTS_ENABLED: flag(process.env.PAYMENTS_ENABLED),
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || '',
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || '',
   FULL_PRICE_PENCE: Number(process.env.FULL_PRICE_PENCE) || 1900,
@@ -31,7 +35,7 @@ const config = {
   SESSION_DAYS: 90,
 
   // AI — off by default; the whole app runs (template engines) with it off.
-  AI_ENABLED: process.env.AI_ENABLED === 'true',
+  AI_ENABLED: flag(process.env.AI_ENABLED),
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
   AI_MODEL: process.env.AI_MODEL || 'claude-opus-5',
   AI_CALL_CAP: Number(process.env.AI_CALL_CAP) || 40, // per event, cost guard
